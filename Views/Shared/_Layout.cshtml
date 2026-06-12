@@ -1,0 +1,77 @@
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+}
+<!DOCTYPE html>
+<html lang="@culture" dir="@(isRtl ? "rtl" : "ltr")" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @Localizer.T("common.appName")</title>
+    
+    <!-- Tailwind compiled stylesheet -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <!-- Logo -->
+            <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2.5 group" aria-label="@Localizer.T("common.appName")">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <span class="absolute inset-0 rounded-xl bg-gradient-accent opacity-0 group-hover:opacity-100 blur-md transition-opacity"></span>
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground">@Localizer.T("common.appName")</span>
+            </a>
+
+            <!-- Nav elements -->
+            <nav class="flex items-center gap-1.5">
+                <!-- Language Switcher -->
+                <a asp-controller="Home" asp-action="SetLanguage" asp-route-culture="@(isRtl ? "en" : "ar")" 
+                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="languages" class="h-4 w-4"></i>
+                    <span>@(isRtl ? "English" : "العربية")</span>
+                </a>
+
+                <!-- Dashboard link -->
+                <a asp-controller="Dashboard" asp-action="Index" 
+                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                    <span>@Localizer.T("common.dashboard")</span>
+                </a>
+
+                <!-- Book link -->
+                <a asp-controller="Booking" asp-action="Index" 
+                   class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    <span>@Localizer.T("common.bookAppointment")</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="flex-1 flex flex-col">
+        @RenderBody()
+    </div>
+
+    <footer class="border-t border-border/60 py-8 bg-card">
+        <div class="container mx-auto px-4 md:px-8 text-center text-xs text-muted-foreground">
+            © @DateTime.Now.Year @Localizer.T("common.appName") · @Localizer.T("common.tagline")
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

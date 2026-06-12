@@ -1,0 +1,770 @@
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    ViewData["Title"] = Localizer.T("common.bookAppointment");
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+    var branches = ViewBag.Branches as List<Mw3dy.Models.Branch> ?? new List<Mw3dy.Models.Branch>();
+    var userName = ViewBag.UserName as string ?? "Adham Emad";
+
+    var services = ViewBag.Services as List<Mw3dy.Models.Service> ?? new List<Mw3dy.Models.Service>();
+
+    var timeSlots = new List<string>();
+    for (int h = 9; h < 17; h++)
+    {
+        timeSlots.Add($"{h:D2}:00");
+        timeSlots.Add($"{h:D2}:30");
+    }
+}
+
+<!-- Canvas Confetti CDN -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<div class="min-h-screen bg-background">
+    <main class="container mx-auto px-4 md:px-8 py-8 md:py-12">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- STEPPER PROGRESS BAR -->
+            <div class="mb-8" id="stepper-container">
+                <ol class="flex items-center w-full gap-2 sm:gap-3">
+                    <!-- Step 1 (Service) -->
+                    <li class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0" id="step-dot-0">
+                        <div class="step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-primary text-white shadow-soft transition-all">
+                            <span class="step-num">1</span>
+                        </div>
+                        <span class="hidden sm:inline text-sm font-semibold text-foreground truncate">@Localizer.T("steps.service")</span>
+                        <div class="flex-1 h-px bg-border step-line"></div>
+                    </li>
+                    <!-- Step 2 (Branch) -->
+                    <li class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0" id="step-dot-1">
+                        <div class="step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-muted text-muted-foreground transition-all">
+                            <span class="step-num">2</span>
+                        </div>
+                        <span class="hidden sm:inline text-sm font-semibold text-muted-foreground truncate">@Localizer.T("steps.branch")</span>
+                        <div class="flex-1 h-px bg-border step-line"></div>
+                    </li>
+                    <!-- Step 3 (Schedule) -->
+                    <li class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0" id="step-dot-2">
+                        <div class="step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-muted text-muted-foreground transition-all">
+                            <span class="step-num">3</span>
+                        </div>
+                        <span class="hidden sm:inline text-sm font-semibold text-muted-foreground truncate">@Localizer.T("steps.schedule")</span>
+                        <div class="flex-1 h-px bg-border step-line"></div>
+                    </li>
+                    <!-- Step 4 (Review) -->
+                    <li class="flex items-center gap-2 sm:gap-3 flex-0" id="step-dot-3">
+                        <div class="step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-muted text-muted-foreground transition-all">
+                            <span class="step-num">4</span>
+                        </div>
+                        <span class="hidden sm:inline text-sm font-semibold text-muted-foreground truncate">@Localizer.T("steps.reviewLabel")</span>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- STEP TITLES -->
+            <div class="mb-6" id="titles-container">
+                <h1 id="step-title" class="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">@Localizer.T("steps.selectService")</h1>
+                <p id="step-desc" class="mt-2 text-muted-foreground text-sm">@Localizer.T("steps.selectServiceDesc")</p>
+            </div>
+
+            <!-- STEP CONTENT BLOCKS -->
+            <div id="booking-wizard-form" class="relative space-y-6">
+                
+                <!-- LOADING STATE OVERLAY -->
+                <div id="booking-loading-overlay" class="hidden absolute inset-0 bg-background/85 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center rounded-2xl animate-fade-in min-h-[300px]">
+                    <div class="relative flex items-center justify-center">
+                        <!-- Outer animated ring -->
+                        <div class="h-12 w-12 rounded-full border-4 border-accent/20 border-t-accent animate-spin"></div>
+                        <!-- Inner pulse dot -->
+                        <div class="absolute h-6 w-6 rounded-full bg-accent/10 animate-ping"></div>
+                    </div>
+                    <p class="mt-4 text-xs font-semibold text-foreground/80 tracking-wide animate-pulse">@Localizer.T("common.loading")</p>
+                </div>
+                
+                <!-- STEP 0: SELECT SERVICE -->
+                <div id="step-content-0" class="step-content">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach (var svc in services)
+                        {
+                            var titleKey = $"services.{svc.Id}";
+                            var descKey = $"services.{svc.Id}Desc";
+                            var titleTranslated = Localizer.T(titleKey);
+                            var descTranslated = Localizer.T(descKey);
+
+                            var displayTitle = titleTranslated != titleKey ? titleTranslated : svc.Title;
+                            var displayDesc = descTranslated != descKey ? descTranslated : svc.Desc;
+
+                            <button type="button" onclick="selectService(this, '@svc.Id')" id="svc-btn-@svc.Id"
+                                    class="service-card group relative text-start rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md active:scale-[0.99]">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white service-icon-wrapper">
+                                        <i data-lucide="@svc.Icon" class="h-5 w-5"></i>
+                                    </div>
+                                    <span class="check-icon hidden h-6 w-6 items-center justify-center rounded-full bg-accent text-white">
+                                        <i data-lucide="check" class="h-3.5 w-3.5"></i>
+                                    </span>
+                                </div>
+                                <h3 class="font-bold text-foreground">@displayTitle</h3>
+                                <p class="mt-1 text-xs text-muted-foreground leading-relaxed">@displayDesc</p>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- STEP 1: SELECT BRANCH -->
+                <div id="step-content-1" class="step-content hidden">
+                    <div class="grid gap-3 md:grid-cols-2">
+                        @foreach (var b in branches)
+                        {
+                            var displayName = isRtl ? b.NameAr : b.NameEn;
+                            var displayCity = isRtl ? b.CityAr : b.CityEn;
+                            var displayAddress = isRtl ? b.AddressAr : b.AddressEn;
+                            var displayHours = isRtl ? b.HoursAr : b.HoursEn;
+
+                            <button type="button" onclick="selectBranch(this, '@b.Id', '@displayName.Replace("'", "\\'")', '@displayAddress.Replace("'", "\\'")')" id="branch-btn-@b.Id"
+                                    class="branch-card text-start rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md active:scale-[0.99]">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <h3 class="font-bold truncate text-foreground">@displayName</h3>
+                                        <p class="mt-1 text-xs text-muted-foreground">@displayCity</p>
+                                        <div class="mt-3 flex flex-col gap-1.5 text-xs text-muted-foreground">
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                                @displayAddress
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <i data-lucide="clock" class="h-3.5 w-3.5"></i>
+                                                @displayHours
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="text-xs font-semibold text-muted-foreground whitespace-nowrap">@b.DistanceKm km</span>
+                                        <span class="check-icon hidden h-6 w-6 items-center justify-center rounded-full bg-accent text-white">
+                                            <i data-lucide="check" class="h-3.5 w-3.5"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- STEP 2: SELECT DATE & TIME -->
+                <div id="step-content-2" class="step-content hidden">
+                    <div class="grid lg:grid-cols-[auto_1fr] gap-6">
+                        <!-- Custom JS Calendar Card -->
+                        <div class="rounded-2xl border border-border bg-card p-4 shadow-soft self-start mx-auto lg:mx-0 w-full max-w-sm">
+                            <div class="flex items-center justify-between mb-4 px-1">
+                                <button type="button" onclick="prevMonth()" class="p-1.5 rounded-lg border hover:bg-muted text-muted-foreground">
+                                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                                </button>
+                                <span id="calendar-month-year" class="text-sm font-semibold text-foreground">June 2026</span>
+                                <button type="button" onclick="nextMonth()" class="p-1.5 rounded-lg border hover:bg-muted text-muted-foreground">
+                                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                </button>
+                            </div>
+                            <!-- Days Header -->
+                            <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground mb-2">
+                                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                            </div>
+                            <!-- Days Grid -->
+                            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
+                        </div>
+
+                        <!-- Time slots picker -->
+                        <div class="w-full">
+                            <h3 class="text-sm font-bold mb-3 text-foreground">@Localizer.T("common.dateTime")</h3>
+                            <div id="no-date-selected" class="text-sm text-muted-foreground p-4 bg-muted/40 rounded-xl border border-border/40">
+                                @Localizer.T("steps.selectDateTimeDesc")
+                            </div>
+                            <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 hidden">
+                                @foreach (var slot in timeSlots)
+                                {
+                                    <button type="button" onclick="selectTime(this, '@slot')" id="time-btn-@slot.Replace(":", "-")"
+                                            class="time-card h-10 rounded-lg border border-border bg-card text-sm font-semibold text-foreground transition-all hover:border-accent/50 hover:bg-accent/5">
+                                        @slot
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: REVIEW BOOKING -->
+                <div id="step-content-3" class="step-content hidden">
+                    <div class="rounded-2xl border border-border bg-gradient-card overflow-hidden shadow-soft">
+                        <div class="bg-gradient-hero text-white p-6">
+                            <p class="text-xs uppercase tracking-wider text-white/70">@Localizer.T("common.summary")</p>
+                            <h3 id="review-service-title" class="mt-1 text-2xl font-bold">Open Account</h3>
+                        </div>
+                        
+                        <dl class="divide-y divide-border">
+                            <!-- Customer Row -->
+                            <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_140px_1fr] gap-3 sm:gap-4 items-center px-6 py-4">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                                    <i data-lucide="user" class="h-4 w-4"></i>
+                                </span>
+                                <dt class="text-sm text-muted-foreground">@Localizer.T("common.customer")</dt>
+                                <dd class="text-sm font-semibold text-foreground">@userName</dd>
+                            </div>
+                            <!-- Service Row -->
+                            <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_140px_1fr] gap-3 sm:gap-4 items-center px-6 py-4">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent" id="review-service-icon-container">
+                                    <i data-lucide="wallet" class="h-4 w-4"></i>
+                                </span>
+                                <dt class="text-sm text-muted-foreground">@Localizer.T("common.service")</dt>
+                                <dd id="review-service-name" class="text-sm font-semibold text-foreground">Open Account</dd>
+                            </div>
+                            <!-- Branch Row -->
+                            <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_140px_1fr] gap-3 sm:gap-4 items-center px-6 py-4">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                                    <i data-lucide="map-pin" class="h-4 w-4"></i>
+                                </span>
+                                <dt class="text-sm text-muted-foreground">@Localizer.T("common.branch")</dt>
+                                <dd id="review-branch-name" class="text-sm font-semibold text-foreground">Downtown Flagship · Address</dd>
+                            </div>
+                            <!-- Date & Time Row -->
+                            <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_140px_1fr] gap-3 sm:gap-4 items-center px-6 py-4">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                                    <i data-lucide="calendar-days" class="h-4 w-4"></i>
+                                </span>
+                                <dt class="text-sm text-muted-foreground">@Localizer.T("common.dateTime")</dt>
+                                <dd id="review-datetime" class="text-sm font-semibold text-foreground">2026-06-12 · 10:00</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <!-- Notes Input -->
+                    <div class="mt-6">
+                        <label for="booking-notes" class="block text-sm font-semibold text-foreground mb-2">
+                            @Localizer.T("common.notes") <span class="text-xs text-muted-foreground font-normal">(@Localizer.T("common.optional"))</span>
+                        </label>
+                        <textarea id="booking-notes" rows="3" placeholder="@(isRtl ? "أضف أي تفاصيل أو متطلبات خاصة هنا..." : "Enter any special details or requirements here...")"
+                                  class="w-full rounded-xl border border-border bg-card p-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"></textarea>
+                    </div>
+                </div>
+
+                <!-- STEP 4: DONE / CONFIRMATION -->
+                <div id="step-content-4" class="step-content hidden">
+                    <div class="max-w-md mx-auto text-center animate-scale-in py-10">
+                        <div class="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-6 shadow-glow border border-emerald-200">
+                            <i data-lucide="check-circle-2" class="h-10 w-10"></i>
+                        </div>
+                        <h1 class="text-3xl font-extrabold tracking-tight text-foreground">@Localizer.T("common.bookingConfirmed")</h1>
+                        <p class="mt-3 text-muted-foreground text-sm leading-relaxed">@Localizer.T("steps.reviewDesc")</p>
+                        
+                        <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                            <a asp-controller="Dashboard" asp-action="Index" 
+                               class="inline-flex items-center justify-center h-11 px-6 bg-gradient-accent text-white font-medium rounded-xl hover:opacity-95 shadow-soft transition-all">
+                                @Localizer.T("common.dashboard")
+                            </a>
+                            <button type="button" onclick="restartWizard()" 
+                                    class="inline-flex items-center justify-center h-11 px-6 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-xl transition-colors">
+                                @Localizer.T("common.bookAppointment")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BACK / NEXT WIZARD FOOTER ACTIONS -->
+            <div id="wizard-actions" class="mt-10 flex items-center justify-between gap-3 border-t border-border/40 pt-6">
+                <!-- Back Button -->
+                <button type="button" onclick="goBack()" id="back-btn" 
+                        class="inline-flex items-center gap-2 h-10 px-5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-medium transition-colors">
+                    <i data-lucide="arrow-left" id="back-arrow-icon" class="h-4 w-4 @(isRtl ? "rotate-180" : "")"></i>
+                    <span>@Localizer.T("common.back")</span>
+                </button>
+
+                <!-- Next Button -->
+                <button type="button" onclick="goNext()" id="next-btn" disabled 
+                        class="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-gradient-accent text-white font-medium hover:opacity-95 shadow-soft transition-all disabled:opacity-50 disabled:pointer-events-none">
+                    <span id="next-btn-text">@Localizer.T("common.next")</span>
+                    <i data-lucide="arrow-right" id="next-arrow-icon" class="h-4 w-4 @(isRtl ? "rotate-180" : "")"></i>
+                </button>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- simple toast container -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+@section Scripts {
+    <script>
+        // State variables
+        let currentStep = 0;
+        let selectedService = null;
+        let selectedBranchId = null;
+        let selectedBranchName = "";
+        let selectedBranchAddress = "";
+        let selectedDate = null; // Date object
+        let selectedTime = null; // string e.g. "10:30"
+
+        // Setup translation mapping for javascript
+        const servicesMap = {
+            @foreach (var s in services)
+            {
+                var titleKey = $"services.{s.Id}";
+                var titleTranslated = Localizer.T(titleKey);
+                var displayTitle = titleTranslated != titleKey ? titleTranslated : s.Title;
+                <text>"@s.Id": { title: "@displayTitle.Replace("'", "\\'")", icon: "@s.Icon" },</text>
+            }
+        };
+
+        const titles = [
+            { title: "@Localizer.T("steps.selectService")", desc: "@Localizer.T("steps.selectServiceDesc")" },
+            { title: "@Localizer.T("steps.selectBranch")", desc: "@Localizer.T("steps.selectBranchDesc")" },
+            { title: "@Localizer.T("steps.selectDateTime")", desc: "@Localizer.T("steps.selectDateTimeDesc")" },
+            { title: "@Localizer.T("steps.review")", desc: "@Localizer.T("steps.reviewDesc")" }
+        ];
+
+        // Language properties
+        const isRtl = @(isRtl ? "true" : "false");
+
+        // Calendar variables
+        let currentDate = new Date(); // Month navigation date
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Prepopulate service if passed in query string
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const svcParam = urlParams.get('service');
+            if (svcParam && servicesMap[svcParam]) {
+                selectService(svcParam);
+            }
+            renderCalendar();
+        });
+
+        // ---------------- WIZARD CONTROLLER ----------------
+
+        function selectService(btn, id) {
+            selectedService = id;
+            
+            // Highlight selected service card
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.remove('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
+                card.querySelector('.check-icon').classList.add('hidden');
+                card.querySelector('.service-icon-wrapper').classList.remove('bg-accent');
+                card.querySelector('.service-icon-wrapper').classList.add('bg-primary');
+            });
+
+            if (btn) {
+                btn.classList.add('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
+                btn.querySelector('.check-icon').classList.remove('hidden');
+                btn.querySelector('.service-icon-wrapper').classList.remove('bg-primary');
+                btn.querySelector('.service-icon-wrapper').classList.add('bg-accent');
+            }
+
+            validateStep();
+        }
+
+        function selectBranch(btn, id) {
+            selectedBranchId = id;
+            // Get branch info from button dataset or DOM attributes
+            const card = btn;
+            if (card) {
+                // Look for Name and Address
+                const h3 = card.querySelector('h3');
+                const addressSpan = card.querySelector('span'); // First span is address
+                selectedBranchName = h3 ? h3.textContent.trim() : "";
+                // Let's get address from specific class or index if needed, but it's simpler to use the parameters passed:
+            }
+
+            // Let's just use the parameters we pass in!
+            // Wait, we can keep using parameters from onclick
+        }
+
+        function selectBranch(btn, id, name, address) {
+            selectedBranchId = id;
+            selectedBranchName = name;
+            selectedBranchAddress = address;
+
+            // Highlight selected branch card
+            document.querySelectorAll('.branch-card').forEach(card => {
+                card.classList.remove('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
+                card.querySelector('.check-icon').classList.add('hidden');
+            });
+
+            if (btn) {
+                btn.classList.add('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
+                btn.querySelector('.check-icon').classList.remove('hidden');
+            }
+
+            validateStep();
+        }
+
+        function selectTime(btn, slot) {
+            selectedTime = slot;
+
+            // Highlight selected time button
+            document.querySelectorAll('.time-card').forEach(b => {
+                b.classList.remove('bg-accent', 'text-white', 'border-accent', 'shadow-soft');
+                b.classList.add('bg-card', 'border-border', 'text-foreground');
+            });
+
+            if (btn) {
+                btn.classList.remove('bg-card', 'border-border', 'text-foreground');
+                btn.classList.add('bg-accent', 'text-white', 'border-accent', 'shadow-soft');
+            }
+
+            validateStep();
+        }
+
+        function validateStep() {
+            let isValid = false;
+            if (currentStep === 0) isValid = selectedService !== null;
+            else if (currentStep === 1) isValid = selectedBranchId !== null;
+            else if (currentStep === 2) isValid = selectedDate !== null && selectedTime !== null;
+            else if (currentStep === 3) isValid = true;
+
+            document.getElementById('next-btn').disabled = !isValid;
+        }
+
+        function updateWizardUI() {
+            // Hide all step content and reset transitions
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('animate-fade-in');
+            });
+            
+            // Show active step content with transition
+            const activeStepEl = document.getElementById(`step-content-${currentStep}`);
+            if (activeStepEl) {
+                activeStepEl.classList.remove('hidden');
+                activeStepEl.classList.add('animate-fade-in');
+            }
+
+            // Update Titles
+            if (currentStep < 4) {
+                document.getElementById('step-title').textContent = titles[currentStep].title;
+                document.getElementById('step-desc').textContent = titles[currentStep].desc;
+                document.getElementById('titles-container').classList.remove('hidden');
+                document.getElementById('stepper-container').classList.remove('hidden');
+                document.getElementById('wizard-actions').classList.remove('hidden');
+            } else {
+                // Done screen
+                document.getElementById('titles-container').classList.add('hidden');
+                document.getElementById('stepper-container').classList.add('hidden');
+                document.getElementById('wizard-actions').classList.add('hidden');
+            }
+
+            // Update Stepper dots
+            for (let i = 0; i <= 3; i++) {
+                const li = document.getElementById(`step-dot-${i}`);
+                if (!li) continue;
+                
+                const dot = li.querySelector('.step-dot');
+                const text = li.querySelector('span.truncate');
+                const line = li.querySelector('.step-line');
+                const numSpan = dot ? dot.querySelector('.step-num') : null;
+
+                if (i < currentStep) {
+                    // Done step
+                    if (dot) dot.className = "step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-emerald-500 text-white transition-all duration-300";
+                    if (numSpan) numSpan.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i>';
+                    if (text) text.className = "hidden sm:inline text-sm font-semibold text-muted-foreground truncate";
+                    if (line) {
+                        line.classList.remove('bg-border');
+                        line.classList.add('bg-emerald-500');
+                    }
+                } else if (i === currentStep) {
+                    // Active step
+                    if (dot) dot.className = "step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-primary text-white shadow-soft transition-all duration-300";
+                    if (numSpan) numSpan.textContent = i + 1;
+                    if (text) text.className = "hidden sm:inline text-sm font-semibold text-foreground truncate";
+                    if (line) {
+                        line.classList.remove('bg-emerald-500');
+                        line.classList.add('bg-border');
+                    }
+                } else {
+                    // Upcoming step
+                    if (dot) dot.className = "step-dot relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold bg-muted text-muted-foreground transition-all duration-300";
+                    if (numSpan) numSpan.textContent = i + 1;
+                    if (text) text.className = "hidden sm:inline text-sm font-semibold text-muted-foreground truncate";
+                    if (line) {
+                        line.classList.remove('bg-emerald-500');
+                        line.classList.add('bg-border');
+                    }
+                }
+            }
+
+            lucide.createIcons();
+
+            // Next button label & icon
+            const nextBtnText = document.getElementById('next-btn-text');
+            const nextArrowIcon = document.getElementById('next-arrow-icon');
+            
+            if (currentStep === 3) {
+                nextBtnText.textContent = "@Localizer.T("common.confirmBooking")";
+                nextArrowIcon.setAttribute('data-lucide', 'check-circle-2');
+                nextArrowIcon.className = "h-4 w-4";
+            } else {
+                nextBtnText.textContent = "@Localizer.T("common.next")";
+                nextArrowIcon.setAttribute('data-lucide', 'arrow-right');
+                nextArrowIcon.className = `h-4 w-4 ${isRtl ? "rotate-180" : ""}`;
+            }
+
+            lucide.createIcons();
+            validateStep();
+        }
+
+        function goBack() {
+            if (currentStep === 0) {
+                // Navigate back to previous page
+                window.history.back();
+            } else {
+                currentStep--;
+                updateWizardUI();
+            }
+        }
+
+        function goNext() {
+            if (currentStep < 3) {
+                currentStep++;
+                
+                // If moving to Review Step, populate review info
+                if (currentStep === 3) {
+                    populateReviewData();
+                }
+
+                updateWizardUI();
+            } else {
+                // Confirm booking (Submit to server)
+                submitBooking();
+            }
+        }
+
+        function populateReviewData() {
+            const svcInfo = servicesMap[selectedService];
+            document.getElementById('review-service-title').textContent = svcInfo.title;
+            document.getElementById('review-service-name').textContent = svcInfo.title;
+            
+            // Set service icon
+            const iconContainer = document.getElementById('review-service-icon-container');
+            iconContainer.innerHTML = `<i data-lucide="${svcInfo.icon}" class="h-4 w-4"></i>`;
+
+            // Set branch
+            document.getElementById('review-branch-name').textContent = `${selectedBranchName} · ${selectedBranchAddress}`;
+
+            // Set date time
+            const dateStr = formatDateISO(selectedDate);
+            document.getElementById('review-datetime').textContent = `${dateStr} · ${selectedTime}`;
+        }
+
+        function submitBooking() {
+            const dateStr = formatDateISO(selectedDate);
+            const notes = document.getElementById('booking-notes').value;
+
+            const payload = {
+                service: selectedService,
+                branchId: parseInt(selectedBranchId),
+                date: dateStr,
+                time: selectedTime,
+                notes: notes
+            };
+
+            const overlay = document.getElementById('booking-loading-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = true;
+            nextBtn.textContent = "@Localizer.T("common.loading")";
+
+            fetch('@Url.Action("Confirm", "Booking")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (overlay) overlay.classList.add('hidden');
+                if (data.success) {
+                    // Confetti!
+                    triggerConfetti();
+
+                    // Show success toast
+                    showToast("@Localizer.T("common.bookingConfirmed")", "success");
+
+                    // Move to done screen
+                    currentStep = 4;
+                    updateWizardUI();
+                } else {
+                    nextBtn.disabled = false;
+                    nextBtn.innerHTML = `<span>@Localizer.T("common.confirmBooking")</span> <i data-lucide="check-circle-2" class="h-4 w-4"></i>`;
+                    lucide.createIcons();
+                    showToast(data.message || (isRtl ? "فشل الحجز" : "Booking failed"), "error");
+                }
+            })
+            .catch(err => {
+                console.error("Booking error:", err);
+                if (overlay) overlay.classList.add('hidden');
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = `<span>@Localizer.T("common.confirmBooking")</span> <i data-lucide="check-circle-2" class="h-4 w-4"></i>`;
+                lucide.createIcons();
+                showToast(isRtl ? "حدث خطأ أثناء الحجز" : "An error occurred during booking", "error");
+            });
+        }
+
+        function restartWizard() {
+            currentStep = 0;
+            selectedService = null;
+            selectedBranchId = null;
+            selectedDate = null;
+            selectedTime = null;
+            document.getElementById('booking-notes').value = "";
+
+            // Reset UI highlights
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.remove('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
+                card.querySelector('.check-icon').classList.add('hidden');
+                card.querySelector('.service-icon-wrapper').classList.remove('bg-accent');
+                card.querySelector('.service-icon-wrapper').classList.add('bg-primary');
+            });
+
+            document.querySelectorAll('.branch-card').forEach(card => {
+                card.classList.remove('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
+                card.querySelector('.check-icon').classList.add('hidden');
+            });
+
+            document.querySelectorAll('.time-card').forEach(btn => {
+                btn.classList.remove('bg-accent', 'text-white', 'border-accent', 'shadow-soft');
+                btn.classList.add('bg-card', 'border-border');
+            });
+
+            renderCalendar();
+            updateWizardUI();
+        }
+
+        // ---------------- CALENDAR RENDERER ----------------
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const monthsAr = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Set Header Title
+            const monthName = isRtl ? monthsAr[month] : months[month];
+            document.getElementById('calendar-month-year').textContent = `${monthName} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const prevLastDay = new Date(year, month, 0).getDate();
+
+            const grid = document.getElementById('calendar-days-grid');
+            grid.innerHTML = "";
+
+            // Empty slots for previous month
+            for (let x = firstDayIndex; x > 0; x--) {
+                const dayDiv = document.createElement("div");
+                dayDiv.className = "text-muted-foreground/30 py-2";
+                dayDiv.textContent = prevLastDay - x + 1;
+                grid.appendChild(dayDiv);
+            }
+
+            // Current month days
+            for (let i = 1; i <= lastDay; i++) {
+                const dayDate = new Date(year, month, i);
+                dayDate.setHours(0,0,0,0);
+
+                const isWeekend = dayDate.getDay() === 5 || dayDate.getDay() === 6; // Friday/Saturday
+                const isPast = dayDate < today;
+                const isDisabled = isWeekend || isPast;
+
+                const dayBtn = document.createElement("button");
+                dayBtn.type = "button";
+                dayBtn.className = "py-2 rounded-lg font-medium transition-all text-center w-full focus:outline-none";
+                dayBtn.textContent = i;
+
+                if (isDisabled) {
+                    dayBtn.className += " text-muted-foreground/40 cursor-not-allowed pointer-events-none";
+                } else {
+                    const isSelected = selectedDate && 
+                                      selectedDate.getDate() === i && 
+                                      selectedDate.getMonth() === month && 
+                                      selectedDate.getFullYear() === year;
+
+                    if (isSelected) {
+                        dayBtn.className += " bg-accent text-white font-bold shadow-soft";
+                    } else {
+                        dayBtn.className += " hover:bg-accent/10 hover:text-accent text-foreground";
+                    }
+
+                    dayBtn.onclick = () => selectDate(dayDate);
+                }
+
+                grid.appendChild(dayBtn);
+            }
+        }
+
+        function prevMonth() {
+            // Don't navigate to months before current month
+            const tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            if (tempDate.getMonth() < today.getMonth() && tempDate.getFullYear() <= today.getFullYear()) {
+                return;
+            }
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function selectDate(date) {
+            selectedDate = date;
+            
+            // Show time slots grid
+            document.getElementById('no-date-selected').classList.add('hidden');
+            document.getElementById('time-slots-grid').classList.remove('hidden');
+
+            renderCalendar();
+            validateStep();
+        }
+
+        // ---------------- UTILS ----------------
+
+        function formatDateISO(date) {
+            if (!date) return "";
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function triggerConfetti() {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ["#2563eb", "#0f172a", "#60a5fa", "#22c55e"] });
+            setTimeout(() => confetti({ particleCount: 60, spread: 100, origin: { y: 0.6 } }), 250);
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-elegant bg-card border border-border/80 text-foreground pointer-events-auto transform translate-y-10 opacity-0 transition-all duration-300 ${type === "success" ? "border-l-4 border-l-emerald-500" : "border-l-4 border-l-red-500"}`;
+            
+            const icon = type === "success" ? '<i data-lucide="check-circle-2" class="h-5 w-5 text-emerald-500"></i>' : '<i data-lucide="x-circle" class="h-5 w-5 text-red-500"></i>';
+            toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ attrs: { class: 'h-5 w-5' } });
+            
+            setTimeout(() => {
+                toast.classList.remove("translate-y-10", "opacity-0");
+            }, 50);
+            
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+}

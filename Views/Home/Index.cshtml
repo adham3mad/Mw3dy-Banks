@@ -1,0 +1,108 @@
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    ViewData["Title"] = Localizer.T("hero.title");
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+}
+
+<div class="min-h-screen bg-background">
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden border-b border-border/40">
+        <div class="absolute inset-0 bg-gradient-mesh pointer-events-none"></div>
+        <div class="container mx-auto px-4 md:px-8 relative py-20 md:py-28">
+            <div class="mx-auto max-w-3xl text-center animate-fade-in">
+                <!-- Sparkles badge -->
+                <div class="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-soft mb-6">
+                    <i data-lucide="sparkles" class="h-3.5 w-3.5 text-accent animate-pulse"></i>
+                    <span>@Localizer.T("common.secureNote")</span>
+                </div>
+                
+                <!-- Main Header -->
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground leading-tight text-balance">
+                    @Localizer.T("hero.title")
+                </h1>
+                
+                <!-- Subtext -->
+                <p class="mt-5 text-lg text-muted-foreground text-balance max-w-2xl mx-auto">
+                    @Localizer.T("hero.subtitle")
+                </p>
+                
+                <!-- CTA buttons -->
+                <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+                    <a asp-controller="Booking" asp-action="Index" 
+                       class="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-xl bg-gradient-accent hover:opacity-95 text-white font-medium shadow-glow transition-all">
+                        <span>@Localizer.T("hero.cta")</span>
+                        <i data-lucide="arrow-right" class="h-4 w-4 @(isRtl ? "rotate-180" : "")"></i>
+                    </a>
+                    <a href="#services" 
+                       class="inline-flex items-center justify-center h-12 px-7 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-medium transition-colors">
+                        @Localizer.T("hero.learnMore")
+                    </a>
+                </div>
+
+                <!-- Feature badges -->
+                <div class="mt-16 grid grid-cols-3 gap-4 max-w-xl mx-auto">
+                    <div class="rounded-2xl border border-border/70 bg-card/60 backdrop-blur p-4 text-start shadow-soft">
+                        <i data-lucide="shield-check" class="h-5 w-5 text-accent mb-2"></i>
+                        <div class="text-xl font-bold">@Localizer.T("hero.encryption")</div>
+                        <div class="text-xs text-muted-foreground">@Localizer.T("hero.encryptionDesc")</div>
+                    </div>
+                    <div class="rounded-2xl border border-border/70 bg-card/60 backdrop-blur p-4 text-start shadow-soft">
+                        <i data-lucide="clock" class="h-5 w-5 text-accent mb-2"></i>
+                        <div class="text-xl font-bold">@Localizer.T("hero.booking")</div>
+                        <div class="text-xs text-muted-foreground">@Localizer.T("hero.bookingDesc")</div>
+                    </div>
+                    <div class="rounded-2xl border border-border/70 bg-card/60 backdrop-blur p-4 text-start shadow-soft">
+                        <i data-lucide="sparkles" class="h-5 w-5 text-accent mb-2"></i>
+                        <div class="text-xl font-bold">@Localizer.T("hero.rated")</div>
+                        <div class="text-xs text-muted-foreground">@Localizer.T("hero.ratedDesc")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Grid Section -->
+    <section id="services" class="container mx-auto px-4 md:px-8 py-20 md:py-24">
+        <div class="max-w-2xl mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-foreground">@Localizer.T("steps.selectService")</h2>
+            <p class="mt-3 text-muted-foreground">@Localizer.T("steps.selectServiceDesc")</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @{
+                var servicesList = new[]
+                {
+                    new { Id = "account", Icon = "wallet", Tone = "from-sky-500/15 to-blue-500/5" },
+                    new { Id = "loan", Icon = "hand-coins", Tone = "from-emerald-500/15 to-teal-500/5" },
+                    new { Id = "mortgage", Icon = "home", Tone = "from-violet-500/15 to-indigo-500/5" },
+                    new { Id = "wealth", Icon = "trending-up", Tone = "from-amber-500/15 to-orange-500/5" },
+                    new { Id = "cards", Icon = "credit-card", Tone = "from-rose-500/15 to-pink-500/5" },
+                    new { Id = "business", Icon = "briefcase", Tone = "from-cyan-500/15 to-sky-500/5" }
+                };
+
+                foreach (var svc in servicesList)
+                {
+                    <a asp-controller="Booking" asp-action="Index" asp-route-service="@svc.Id" 
+                       class="group relative overflow-hidden rounded-2xl border border-border bg-gradient-card p-6 transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 block">
+                        <div class="absolute inset-0 bg-gradient-to-br @svc.Tone opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <!-- Icon wrapper -->
+                            <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white mb-4">
+                                <i data-lucide="@svc.Icon" class="h-5 w-5"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-foreground">@Localizer.T($"services.{svc.Id}")</h3>
+                            <p class="mt-1.5 text-sm text-muted-foreground">@Localizer.T($"services.{svc.Id}Desc")</p>
+                            
+                            <!-- Arrow link -->
+                            <div class="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+                                <span>@Localizer.T("common.bookAppointment")</span>
+                                <i data-lucide="arrow-right" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 @(isRtl ? "rotate-180 group-hover:-translate-x-1" : "")"></i>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+    </section>
+</div>

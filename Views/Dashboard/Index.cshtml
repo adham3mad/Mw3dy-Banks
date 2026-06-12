@@ -1,0 +1,292 @@
+@model IEnumerable<Mw3dy.Models.Appointment>
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    ViewData["Title"] = Localizer.T("common.dashboard");
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+
+    var now = DateTime.UtcNow;
+    // Helper to check if appointment is upcoming
+    bool IsUpcoming(Mw3dy.Models.Appointment a)
+    {
+        if (a.Status != "confirmed") return false;
+        if (DateTime.TryParse($"{a.Date}T{a.Time}", out DateTime dt))
+        {
+            // Compare local/UTC time. To be simple, we parse and check against local offset.
+            return dt >= DateTime.Today; // date-level safety or date-time
+        }
+        return false;
+    }
+
+    var upcoming = Model.Where(IsUpcoming).OrderBy(a => a.Date).ThenBy(a => a.Time).ToList();
+    var past = Model.Where(a => !IsUpcoming(a)).OrderByDescending(a => a.Date).ThenByDescending(a => a.Time).ToList();
+
+    var serviceIcons = new Dictionary<string, string>
+    {
+        { "account", "wallet" },
+        { "loan", "hand-coins" },
+        { "mortgage", "home" },
+        { "wealth", "trending-up" },
+        { "cards", "credit-card" },
+        { "business", "briefcase" }
+    };
+}
+
+<div class="min-h-screen bg-background">
+    <main class="container mx-auto px-4 md:px-8 py-8 md:py-12 space-y-10">
+        <!-- Hero Card -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-hero text-white p-7 md:p-10 shadow-elegant animate-fade-in">
+            <div class="absolute inset-0 bg-gradient-mesh opacity-50"></div>
+            <div class="relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                <div>
+                    <p class="text-sm text-white/70">@Localizer.T("common.welcome")</p>
+                    <h1 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">@ViewBag.UserName</h1>
+                    <p class="mt-2 text-white/75 max-w-md">@Localizer.T("hero.subtitle")</p>
+                </div>
+                <a asp-controller="Booking" asp-action="Index" 
+                   class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-white text-primary hover:bg-white/90 font-semibold shadow-glow transition-all">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    <span>@Localizer.T("common.bookAppointment")</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="animate-fade-in" style="animation-delay: 100ms;">
+            <div class="flex items-baseline justify-between mb-4">
+                <h2 class="text-lg font-bold text-foreground">@Localizer.T("common.quickActions")</h2>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                @{
+                    var quickServices = new[] { "account", "loan", "mortgage", "wealth" };
+                    foreach (var svc in quickServices)
+                    {
+                        var icon = serviceIcons.GetValueOrDefault(svc, "calendar");
+                        <a asp-controller="Booking" asp-action="Index" asp-route-service="@svc" 
+                           class="group rounded-2xl border border-border bg-card p-4 hover:shadow-md hover:border-accent/40 transition-all block">
+                            <div class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent mb-3 group-hover:bg-accent group-hover:text-white transition-colors">
+                                <i data-lucide="@icon" class="h-5 w-5"></i>
+                            </div>
+                            <div class="text-sm font-semibold text-foreground">@Localizer.T($"services.{svc}")</div>
+                        </a>
+                    }
+                }
+            </div>
+        </section>
+
+        <!-- Upcoming Appointments -->
+        <section class="animate-fade-in" style="animation-delay: 200ms;">
+            <div class="flex items-baseline justify-between mb-4">
+                <h2 class="text-lg font-bold flex items-center gap-2 text-foreground">
+                    <i data-lucide="sparkles" class="h-4 w-4 text-accent animate-pulse"></i>
+                    <span>@Localizer.T("common.upcoming")</span>
+                </h2>
+                <span id="upcoming-count" class="text-sm text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full font-medium">@upcoming.Count</span>
+            </div>
+
+            @if (upcoming.Count == 0)
+            {
+                <div id="empty-state" class="rounded-2xl border border-dashed border-border p-10 text-center bg-card">
+                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent mb-3">
+                        <i data-lucide="calendar-days" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="font-bold text-foreground">@Localizer.T("common.noAppointments")</h3>
+                    <p class="mt-1 text-sm text-muted-foreground">@Localizer.T("common.noAppointmentsDesc")</p>
+                    <a asp-controller="Booking" asp-action="Index" 
+                       class="mt-5 inline-flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-gradient-accent text-white font-medium hover:opacity-95 shadow-soft transition-all">
+                        <span>@Localizer.T("common.bookAppointment")</span>
+                        <i data-lucide="arrow-right" class="h-4 w-4 @(isRtl ? "rotate-180" : "")"></i>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div id="upcoming-grid" class="grid gap-4 md:grid-cols-2">
+                    @foreach (var appt in upcoming)
+                    {
+                        var icon = serviceIcons.GetValueOrDefault(appt.Service, "calendar");
+                        <article id="appt-card-@appt.Id" class="rounded-2xl border border-border bg-gradient-card p-5 shadow-soft hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shrink-0">
+                                        <i data-lucide="@icon" class="h-5 w-5"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-foreground">@Localizer.T($"services.{appt.Service}")</h3>
+                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <i data-lucide="calendar-days" class="h-3.5 w-3.5"></i>
+                                                @appt.Date · @appt.Time
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                                @{
+                                                    var branchName = appt.Branch != null 
+                                                        ? (isRtl ? appt.Branch.NameAr : appt.Branch.NameEn) 
+                                                        : appt.BranchId.ToString();
+                                                }
+                                                @branchName
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border-0">
+                                    @Localizer.T($"status.{appt.Status}")
+                                </span>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(appt.Notes))
+                            {
+                                <div class="mt-3 text-xs bg-muted/50 p-2.5 rounded-lg text-muted-foreground border border-border/40">
+                                    <span class="font-semibold text-foreground">@Localizer.T("common.notes"):</span> @appt.Notes
+                                </div>
+                            }
+
+                            <div class="mt-4 flex items-center justify-end">
+                                <button type="button" onclick="cancelBooking('@appt.Id')" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors">
+                                    <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                                    <span>@Localizer.T("common.cancelBooking")</span>
+                                </button>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+
+        <!-- Past Appointments -->
+        <section class="animate-fade-in" style="animation-delay: 300ms;">
+            <div class="flex items-baseline justify-between mb-4">
+                <h2 class="text-lg font-bold flex items-center gap-2 text-foreground">
+                    <i data-lucide="history" class="h-4 w-4 text-muted-foreground"></i>
+                    <span>@Localizer.T("common.past")</span>
+                </h2>
+                <span class="text-sm text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full font-medium">@past.Count</span>
+            </div>
+
+            @if (past.Count == 0)
+            {
+                <p class="text-sm text-muted-foreground bg-card border border-border rounded-2xl p-6 text-center">@Localizer.T("common.noAppointmentsDesc")</p>
+            }
+            else
+            {
+                <div class="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-muted/50 text-muted-foreground">
+                                <tr class="text-start">
+                                    <th class="px-6 py-4 text-start font-semibold">@Localizer.T("common.service")</th>
+                                    <th class="px-6 py-4 text-start font-semibold hidden sm:table-cell">@Localizer.T("common.branch")</th>
+                                    <th class="px-6 py-4 text-start font-semibold">@Localizer.T("common.dateTime")</th>
+                                    <th class="px-6 py-4 text-start font-semibold">@Localizer.T("common.status")</th>
+                                </tr>
+                            </thead>
+                            <tbody id="past-table-body" class="divide-y divide-border/60">
+                                @foreach (var appt in past)
+                                {
+                                    <tr class="hover:bg-muted/10 transition-colors">
+                                        <td class="px-6 py-4 font-semibold text-foreground">@Localizer.T($"services.{appt.Service}")</td>
+                                        <td class="px-6 py-4 text-muted-foreground hidden sm:table-cell">
+                                            @{
+                                                var branchNamePast = appt.Branch != null 
+                                                    ? (isRtl ? appt.Branch.NameAr : appt.Branch.NameEn) 
+                                                    : appt.BranchId.ToString();
+                                            }
+                                            @branchNamePast
+                                        </td>
+                                        <td class="px-6 py-4 text-muted-foreground whitespace-nowrap">@appt.Date · @appt.Time</td>
+                                        <td class="px-6 py-4">
+                                            @if (appt.Status == "cancelled")
+                                            {
+                                                <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                                    @Localizer.T($"status.{appt.Status}")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                    @Localizer.T($"status.{appt.Status}")
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </section>
+    </main>
+</div>
+
+<!-- Simple elegant toast container -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+@section Scripts {
+    <script>
+        // Custom simple toast function matching sonner/react
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-elegant bg-card border border-border/80 text-foreground pointer-events-auto transform translate-y-10 opacity-0 transition-all duration-300 ${type === "success" ? "border-l-4 border-l-emerald-500" : "border-l-4 border-l-red-500"}`;
+            
+            const icon = type === "success" ? '<i data-lucide="check-circle-2" class="h-5 w-5 text-emerald-500"></i>' : '<i data-lucide="x-circle" class="h-5 w-5 text-red-500"></i>';
+            toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ attrs: { class: 'h-5 w-5' } });
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove("translate-y-10", "opacity-0");
+            }, 50);
+            
+            // Remove after 3s
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        function cancelBooking(id) {
+            if (!confirm("@(isRtl ? "هل أنت متأكد من إلغاء هذا الموعد؟" : "Are you sure you want to cancel this appointment?")")) {
+                return;
+            }
+
+            fetch('@Url.Action("Cancel", "Dashboard")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast("@Localizer.T("common.bookingCancelled")", "success");
+                    
+                    // Animate card removal/fading
+                    const card = document.getElementById(`appt-card-${id}`);
+                    if (card) {
+                        card.classList.add("opacity-50", "scale-95");
+                        setTimeout(() => {
+                            // Reload page to update the upcoming/past lists
+                            window.location.reload();
+                        }, 500);
+                    }
+                } else {
+                    showToast(data.message || (isRtl ? "فشل إلغاء الحجز" : "Failed to cancel booking"), "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showToast(isRtl ? "حدث خطأ غير متوقع" : "An error occurred", "error");
+            });
+        }
+    </script>
+}
