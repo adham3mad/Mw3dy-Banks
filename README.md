@@ -1,20 +1,20 @@
-# 📅 Mw3dy (موعدي) - Premium Booking System
+# Mw3dy - Premium Booking System
 
 Mw3dy is a premium, full-stack, production-ready appointment scheduling web application built on ASP.NET Core MVC. It features rich interactive animations, a custom Egyptian weekend calendar, and a 100% database-driven bilingual localization architecture.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🏛️ Full-Stack MVC Architecture**: Implemented with ASP.NET Core MVC and Entity Framework Core, moving away from decoupled static SPAs to a unified, secure, server-rendered structure.
-- **🌐 100% Database-Driven Bilingual Localization**:
+- **Full-Stack MVC Architecture**: Implemented with ASP.NET Core MVC and Entity Framework Core, moving away from decoupled static SPAs to a unified, secure, server-rendered structure.
+- **100% Database-Driven Bilingual Localization**:
   - Dynamic content like **Services** and **Branches** is queried directly from SQL Server.
   - Supports model-level translation fields (e.g., `NameEn` / `NameAr`, `AddressEn` / `AddressAr`) that adapt to the active user culture (`ar`/`en`) on the fly.
   - Static labels are managed centrally in `translations.json` to keep the application modular and easily customizable.
-- **🗓️ Tailored Weekend Calendar**:
+- **Tailored Weekend Calendar**:
   - Calendar automatically recognizes the Middle Eastern/Egyptian weekend (**Friday and Saturday** as holidays).
   - Sunday is treated as a standard working day, allowing seamless local scheduling.
-- **🎨 Premium UI & Interactive UX**:
+- **Premium UI & Interactive UX**:
   - Built with modern Tailwind CSS glassmorphism, gradient accents, and responsive card-based steps.
   - Animated transitions (`animate-fade-in`), card lifting, and button micro-interactions.
   - Smooth loading overlay with backdrop blur upon booking confirmation.
@@ -22,7 +22,7 @@ Mw3dy is a premium, full-stack, production-ready appointment scheduling web appl
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Backend**: `.NET 9`, `ASP.NET Core MVC`, `Entity Framework Core`
 - **Database**: `Microsoft SQL Server`
@@ -30,7 +30,7 @@ Mw3dy is a premium, full-stack, production-ready appointment scheduling web appl
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```bash
 ├── Controllers/
@@ -62,7 +62,7 @@ Mw3dy is a premium, full-stack, production-ready appointment scheduling web appl
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [.NET SDK 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
@@ -95,7 +95,7 @@ Update the database connection string in your `appsettings.json`:
 
 ---
 
-## 💡 Industry Flexibility (Hospitals & Telecom)
+## Industry Flexibility (Hospitals & Telecom)
 
 The core architecture of **Mw3dy** is completely domain-agnostic:
 - **Services & Branches** are seeded directly into database tables rather than hardcoded in the codebase.
@@ -104,5 +104,5 @@ The core architecture of **Mw3dy** is completely domain-agnostic:
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the MIT License.
