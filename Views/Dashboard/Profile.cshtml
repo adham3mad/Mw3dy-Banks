@@ -1,0 +1,243 @@
+@model Mw3dy.Models.User
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    ViewData["Title"] = Localizer.T("common.profile");
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+    var cities = ViewBag.Cities as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<div class="min-h-screen bg-background">
+    <main class="container mx-auto px-4 md:px-8 py-8 md:py-12 max-w-2xl">
+        <!-- Back link -->
+        <div class="mb-6">
+            <a asp-controller="Dashboard" asp-action="Index" 
+               class="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                <i data-lucide="arrow-left" class="h-4 w-4 @(isRtl ? "rotate-180" : "")"></i>
+                <span>@Localizer.T("common.back")</span>
+            </a>
+        </div>
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-foreground">@Localizer.T("common.profileTitle")</h1>
+            <p class="mt-2 text-muted-foreground text-sm">@Localizer.T("common.profileSubtitle")</p>
+        </div>
+
+        <!-- Profile Form Card -->
+        <div class="rounded-2xl border border-border bg-gradient-card p-6 md:p-8 shadow-soft animate-scale-in">
+            <form id="profile-form" onsubmit="saveProfile(event)" class="space-y-6">
+                <!-- Name Field -->
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-foreground mb-2">
+                        @Localizer.T("common.fullName")
+                    </label>
+                    <div class="input-with-icon-wrapper rounded-xl shadow-sm">
+                        <div class="input-icon">
+                            <i data-lucide="user" class="h-4 w-4"></i>
+                        </div>
+                        <input type="text" id="name" name="name" value="@Model.Name" required
+                               class="block w-full py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm" />
+                    </div>
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-foreground mb-2">
+                        @Localizer.T("common.email")
+                    </label>
+                    <div class="input-with-icon-wrapper rounded-xl shadow-sm">
+                        <div class="input-icon">
+                            <i data-lucide="mail" class="h-4 w-4"></i>
+                        </div>
+                        <input type="email" id="email" name="email" value="@Model.Email" required
+                               class="block w-full py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm" />
+                    </div>
+                </div>
+
+                <!-- Phone Field -->
+                <div>
+                    <label for="phone" class="block text-sm font-semibold text-foreground mb-2">
+                        @Localizer.T("common.profilePhone")
+                    </label>
+                    <div class="input-with-icon-wrapper rounded-xl shadow-sm">
+                        <div class="input-icon">
+                            <i data-lucide="phone" class="h-4 w-4"></i>
+                        </div>
+                        <input type="text" id="phone" name="phone" value="@Model.Phone" placeholder="@(isRtl ? "مثال: 01012345678" : "e.g. 01012345678")"
+                               class="block w-full py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm" />
+                    </div>
+                </div>
+
+                <!-- City Dropdown -->
+                <div>
+                    <label for="city" class="block text-sm font-semibold text-foreground mb-2">
+                        @Localizer.T("common.profileCity")
+                    </label>
+                    <div class="input-with-icon-wrapper rounded-xl shadow-sm">
+                        <div class="input-icon">
+                            <i data-lucide="map" class="h-4 w-4"></i>
+                        </div>
+                        <select id="city" name="city" onchange="toggleCustomCity(this.value)"
+                                class="block w-full py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm">
+                            <option value="">@(isRtl ? "-- اختر منطقتك/مدينتك --" : "-- Select your region/city --")</option>
+                            @foreach (var c in cities)
+                            {
+                                var cityEn = c.CityEn;
+                                var cityAr = c.CityAr;
+                                var displayCityName = isRtl ? cityAr : cityEn;
+                                var isSelected = Model.City == cityEn;
+                                <option value="@cityEn" selected="@(isSelected ? "selected" : null)">@displayCityName</option>
+                            }
+                            <option value="custom" selected="@(string.IsNullOrEmpty(Model.City) || cities.All(c => c.CityEn != Model.City) ? "selected" : null)">
+                                @(isRtl ? "أخرى (إدخال يدوي)" : "Other (Manual Entry)")
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Custom City Input (Shown if 'custom' is selected) -->
+                <div id="custom-city-wrapper" class="hidden">
+                    <label for="custom-city" class="block text-sm font-semibold text-foreground mb-2">
+                        @(isRtl ? "اسم المدينة/المنطقة يدويًا" : "Enter City/Region name")
+                    </label>
+                    <input type="text" id="custom-city" placeholder="@(isRtl ? "مثال: التجمع الخامس، القاهرة" : "e.g. Fifth Settlement, Cairo")"
+                           class="block w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm" />
+                </div>
+
+                <!-- Detailed Address Field -->
+                <div>
+                    <label for="address" class="block text-sm font-semibold text-foreground mb-2">
+                        @Localizer.T("common.profileAddress")
+                    </label>
+                    <div class="input-with-icon-wrapper rounded-xl shadow-sm">
+                        <div class="input-icon">
+                            <i data-lucide="map-pin" class="h-4 w-4"></i>
+                        </div>
+                        <input type="text" id="address" name="address" value="@Model.Address" placeholder="@(isRtl ? "مثال: شارع التسعين، التجمع الخامس" : "e.g. 90th Street, Fifth Settlement")"
+                               class="block w-full py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm" />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" id="save-btn"
+                            class="inline-flex items-center justify-center gap-2 h-11 px-6 bg-gradient-accent text-white font-semibold rounded-xl hover:opacity-95 shadow-soft transition-all active:scale-[0.99]">
+                        <i data-lucide="save" class="h-4 w-4"></i>
+                        <span>@Localizer.T("common.profileSave")</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+@section Scripts {
+    <script>
+        // Check custom city state initially
+        window.addEventListener('DOMContentLoaded', () => {
+            const citySelect = document.getElementById('city');
+            toggleCustomCity(citySelect.value);
+            
+            // Set custom-city input value if user has a custom city not in list
+            if (citySelect.value === 'custom') {
+                const userCity = "@Model.City";
+                document.getElementById('custom-city').value = userCity;
+            }
+        });
+
+        function toggleCustomCity(val) {
+            const wrapper = document.getElementById('custom-city-wrapper');
+            const customInput = document.getElementById('custom-city');
+            if (val === 'custom') {
+                wrapper.classList.remove('hidden');
+                customInput.setAttribute('required', 'required');
+            } else {
+                wrapper.classList.add('hidden');
+                customInput.removeAttribute('required');
+            }
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-elegant bg-card border border-border/80 text-foreground pointer-events-auto transform translate-y-10 opacity-0 transition-all duration-300 ${type === "success" ? "border-l-4 border-l-emerald-500" : "border-l-4 border-l-red-500"}`;
+            
+            const icon = type === "success" ? '<i data-lucide="check-circle-2" class="h-5 w-5 text-emerald-500"></i>' : '<i data-lucide="x-circle" class="h-5 w-5 text-red-500"></i>';
+            toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ attrs: { class: 'h-5 w-5' } });
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove("translate-y-10", "opacity-0");
+            }, 50);
+            
+            // Remove after 3s
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i data-lucide="loader" class="h-4 w-4 animate-spin"></i><span>@(isRtl ? "جارٍ الحفظ..." : "Saving...")</span>';
+            lucide.createIcons();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            let city = document.getElementById('city').value;
+            const address = document.getElementById('address').value;
+
+            if (city === 'custom') {
+                city = document.getElementById('custom-city').value;
+            }
+
+            const payload = new URLSearchParams();
+            payload.append('name', name);
+            payload.append('email', email);
+            payload.append('phone', phone);
+            payload.append('city', city);
+            payload.append('address', address);
+
+            fetch('@Url.Action("Profile", "Dashboard")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: payload
+            })
+            .then(res => res.json())
+            .then(data => {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i data-lucide="save" class="h-4 w-4"></i><span>@Localizer.T("common.profileSave")</span>';
+                lucide.createIcons();
+
+                if (data.success) {
+                    showToast("@Localizer.T("common.profileSuccess")", "success");
+                } else {
+                    showToast(data.message || "@(isRtl ? "فشل حفظ التعديلات" : "Failed to save profile")", "error");
+                }
+            })
+            .catch(err => {
+                console.error("Save error:", err);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i data-lucide="save" class="h-4 w-4"></i><span>@Localizer.T("common.profileSave")</span>';
+                lucide.createIcons();
+                showToast("@(isRtl ? "حدث خطأ أثناء الحفظ" : "An error occurred while saving")", "error");
+            });
+        }
+    </script>
+}

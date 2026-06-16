@@ -41,7 +41,10 @@ namespace Mw3dy.Data
                 {
                     Id = defaultUserId,
                     Name = "Adham Emad",
-                    Email = "adham@mw3dy.com"
+                    Email = "adham@mw3dy.com",
+                    Phone = "01012345678",
+                    City = "New Cairo",
+                    Address = "53 شارع الثورة، مصر الجديدة"
                 }
             );
 
@@ -50,55 +53,55 @@ namespace Mw3dy.Data
                 new Branch 
                 { 
                     Id = 1, 
-                    NameEn = "Downtown Flagship", NameAr = "الفرع الرئيسي بوسط المدينة",
-                    CityEn = "Manhattan, NY", CityAr = "مانهاتن، نيويورك",
-                    AddressEn = "200 Park Ave, Floor 12", AddressAr = "200 شارع بارك، الطابق 12",
-                    HoursEn = "Sun–Thu · 9:00–17:00", HoursAr = "الأحد–الخميس · 9:00–17:00",
+                    NameEn = "National Bank of Egypt - Fifth Settlement", NameAr = "البنك الأهلي المصري - التجمع الخامس",
+                    CityEn = "New Cairo", CityAr = "القاهرة الجديدة",
+                    AddressEn = "90th Street, Beside Americana Plaza", AddressAr = "شارع التسعين، بجوار أمريكانا بلازا",
+                    HoursEn = "Sun–Thu · 8:30–15:00", HoursAr = "الأحد–الخميس · 8:30–15:00",
                     DistanceKm = 1.2 
                 },
                 new Branch 
                 { 
                     Id = 2, 
-                    NameEn = "Financial District", NameAr = "الفرع المالي",
-                    CityEn = "New York, NY", CityAr = "نيويورك، نيويورك",
-                    AddressEn = "55 Wall Street", AddressAr = "55 شارع وول ستريت",
-                    HoursEn = "Sun–Thu · 8:30–17:30", HoursAr = "الأحد–الخميس · 8:30–17:30",
+                    NameEn = "Banque Misr - Heliopolis", NameAr = "بنك مصر - مصر الجديدة",
+                    CityEn = "Cairo", CityAr = "القاهرة",
+                    AddressEn = "24 El-Ahram Street, Roxy", AddressAr = "24 شارع الأهرام، روكسي",
+                    HoursEn = "Sun–Thu · 8:30–15:00", HoursAr = "الأحد–الخميس · 8:30–15:00",
                     DistanceKm = 3.4 
                 },
                 new Branch 
                 { 
                     Id = 3, 
-                    NameEn = "Brooklyn Heights", NameAr = "بروكلين هايتس",
-                    CityEn = "Brooklyn, NY", CityAr = "بروكلين، نيويورك",
-                    AddressEn = "180 Montague St", AddressAr = "180 شارع مونتاغ",
-                    HoursEn = "Sun–Thu · 9:00–17:00", HoursAr = "الأحد–الخميس · 9:00–17:00",
+                    NameEn = "QNB Alahli - Maadi", NameAr = "بنك قطر الوطني الأهلي - المعادي",
+                    CityEn = "Cairo", CityAr = "القاهرة",
+                    AddressEn = "77 Road 9, Near Maadi Metro Station", AddressAr = "77 طريق 9، بالقرب من محطة مترو المعادي",
+                    HoursEn = "Sun–Thu · 8:30–15:00", HoursAr = "الأحد–الخميس · 8:30–15:00",
                     DistanceKm = 6.1 
                 },
                 new Branch 
                 { 
                     Id = 4, 
-                    NameEn = "Midtown Plaza", NameAr = "ميدتاون بلازا",
-                    CityEn = "New York, NY", CityAr = "نيويورك، نيويورك",
-                    AddressEn = "1290 Avenue of the Americas", AddressAr = "1290 جادة الأمريكتين",
-                    HoursEn = "Sun–Thu · 9:00–18:00", HoursAr = "الأحد–الخميس · 9:00–18:00",
+                    NameEn = "Bank of Alexandria - Dokki", NameAr = "بنك الإسكندرية - الدقي",
+                    CityEn = "Giza", CityAr = "الجيزة",
+                    AddressEn = "120 Tahrir Street", AddressAr = "120 شارع التحرير",
+                    HoursEn = "Sun–Thu · 8:30–15:00", HoursAr = "الأحد–الخميس · 8:30–15:00",
                     DistanceKm = 2.8 
                 },
                 new Branch 
                 { 
                     Id = 5, 
-                    NameEn = "Harbor Pointe", NameAr = "هاربور بوينت",
-                    CityEn = "Jersey City, NJ", CityAr = "جيرسي سيتي، نيوجيرسي",
-                    AddressEn = "10 Exchange Pl", AddressAr = "10 إكسشينج بليس",
-                    HoursEn = "Sun–Thu · 9:00–17:00", HoursAr = "الأحد–الخميس · 9:00–17:00",
+                    NameEn = "Nasser Social Bank - Sheikh Zayed", NameAr = "بنك ناصر الاجتماعي - الشيخ زايد",
+                    CityEn = "Giza", CityAr = "الجيزة",
+                    AddressEn = "Sheikh Zayed, Inside Capital Business Park", AddressAr = "الشيخ زايد، داخل كابيتال بيزنس بارك",
+                    HoursEn = "Sun–Thu · 8:30–15:00", HoursAr = "الأحد–الخميس · 8:30–15:00",
                     DistanceKm = 5.5 
                 },
                 new Branch 
                 { 
                     Id = 6, 
-                    NameEn = "Queens Center", NameAr = "كوينز سنتر",
-                    CityEn = "Queens, NY", CityAr = "كوينز، نيويورك",
-                    AddressEn = "90-15 Queens Blvd", AddressAr = "90-15 كوينز بوليفارد",
-                    HoursEn = "Sun–Thu · 9:30–17:00", HoursAr = "الأحد–الخميس · 9:30–17:00",
+                    NameEn = "Commercial International Bank (CIB) - Smouha", NameAr = "البنك التجاري الدولي - سموحة",
+                    CityEn = "Alexandria", CityAr = "الإسكندرية",
+                    AddressEn = "Victor Emmanuel Square, Smouha", AddressAr = "ميدان فيكتور عمانويل، سموحة",
+                    HoursEn = "Sun–Thu · 8:30–15:00", HoursAr = "الأحد–الخميس · 8:30–15:00",
                     DistanceKm = 11.4 
                 }
             );

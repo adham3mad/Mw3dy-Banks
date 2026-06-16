@@ -48,6 +48,13 @@
                     <span>@Localizer.T("common.dashboard")</span>
                 </a>
 
+                <!-- Profile link -->
+                <a asp-controller="Dashboard" asp-action="Profile" 
+                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="user" class="h-4 w-4"></i>
+                    <span>@Localizer.T("common.profile")</span>
+                </a>
+
                 <!-- Book link -->
                 <a asp-controller="Booking" asp-action="Index" 
                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">

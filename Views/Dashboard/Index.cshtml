@@ -119,13 +119,31 @@
                                                 @appt.Date · @appt.Time
                                             </span>
                                             <span class="inline-flex items-center gap-1.5">
-                                                <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
                                                 @{
                                                     var branchName = appt.Branch != null 
                                                         ? (isRtl ? appt.Branch.NameAr : appt.Branch.NameEn) 
                                                         : appt.BranchId.ToString();
+                                                    var branchAddress = appt.Branch != null
+                                                        ? (isRtl ? appt.Branch.AddressAr : appt.Branch.AddressEn)
+                                                        : string.Empty;
+                                                    var branchCity = appt.Branch != null
+                                                        ? (isRtl ? appt.Branch.CityAr : appt.Branch.CityEn)
+                                                        : string.Empty;
                                                 }
-                                                @branchName
+                                                @if (appt.Branch != null)
+                                                {
+                                                    <a href="https://www.google.com/maps/search/?api=1&query=@(Uri.EscapeDataString(branchAddress + ", " + branchCity))" 
+                                                       target="_blank" 
+                                                       class="inline-flex items-center gap-1 hover:text-accent hover:underline transition-colors">
+                                                        <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                                        <span>@branchName (@branchCity)</span>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                                    <span>@branchName</span>
+                                                }
                                             </span>
                                         </div>
                                     </div>
@@ -188,12 +206,30 @@
                                     <tr class="hover:bg-muted/10 transition-colors">
                                         <td class="px-6 py-4 font-semibold text-foreground">@Localizer.T($"services.{appt.Service}")</td>
                                         <td class="px-6 py-4 text-muted-foreground hidden sm:table-cell">
-                                            @{
-                                                var branchNamePast = appt.Branch != null 
-                                                    ? (isRtl ? appt.Branch.NameAr : appt.Branch.NameEn) 
-                                                    : appt.BranchId.ToString();
-                                            }
-                                            @branchNamePast
+                                             @{
+                                                 var branchNamePast = appt.Branch != null 
+                                                     ? (isRtl ? appt.Branch.NameAr : appt.Branch.NameEn) 
+                                                     : appt.BranchId.ToString();
+                                                 var branchAddressPast = appt.Branch != null
+                                                     ? (isRtl ? appt.Branch.AddressAr : appt.Branch.AddressEn)
+                                                     : string.Empty;
+                                                 var branchCityPast = appt.Branch != null
+                                                     ? (isRtl ? appt.Branch.CityAr : appt.Branch.CityEn)
+                                                     : string.Empty;
+                                             }
+                                             @if (appt.Branch != null)
+                                             {
+                                                 <a href="https://www.google.com/maps/search/?api=1&query=@(Uri.EscapeDataString(branchAddressPast + ", " + branchCityPast))" 
+                                                    target="_blank" 
+                                                    class="inline-flex items-center gap-1 hover:text-accent hover:underline transition-colors">
+                                                     <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                                     <span>@branchNamePast (@branchCityPast)</span>
+                                                 </a>
+                                             }
+                                             else
+                                             {
+                                                 @branchNamePast
+                                             }
                                         </td>
                                         <td class="px-6 py-4 text-muted-foreground whitespace-nowrap">@appt.Date · @appt.Time</td>
                                         <td class="px-6 py-4">

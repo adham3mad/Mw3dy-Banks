@@ -29,6 +29,9 @@ namespace Mw3dy.Controllers
             // Get user info
             var user = _context.Users.FirstOrDefault(u => u.Id == _defaultUserId);
             ViewBag.UserName = user?.Name ?? "Adham Emad";
+            ViewBag.UserCity = user?.City ?? string.Empty;
+            ViewBag.UserPhone = user?.Phone ?? string.Empty;
+            ViewBag.UserAddress = user?.Address ?? string.Empty;
 
             return View();
         }

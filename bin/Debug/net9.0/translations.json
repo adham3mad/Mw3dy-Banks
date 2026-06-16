@@ -45,8 +45,19 @@
       "weakPassword": "Password must be 8+ chars with letters and numbers",
       "passwordsDontMatch": "Passwords do not match",
       "haveAccount": "Already have an account?",
-      "noAccount": "New to Meridian?",
-      "secureNote": "Bank-grade encryption · ISO 27001"
+      "noAccount": "New to Mw3dy?",
+      "secureNote": "Bank-grade encryption · ISO 27001",
+      "profile": "Profile",
+      "profileTitle": "User Profile",
+      "profileSubtitle": "Manage your personal information and region preferences.",
+      "profileSave": "Save Changes",
+      "profileCity": "City / Region",
+      "profileAddress": "Address",
+      "profilePhone": "Mobile Number",
+      "profileSuccess": "Profile updated successfully!",
+      "recommendedBranches": "Recommended for Your Location",
+      "otherBranches": "Other Branches",
+      "searchBranchesPlaceholder": "Search by name, city, or address..."
     },
     "steps": {
       "service": "Service",
@@ -167,7 +178,18 @@
       "passwordsDontMatch": "كلمتا المرور غير متطابقتين",
       "haveAccount": "لديك حساب بالفعل؟",
       "noAccount": "جديد على موعدي؟",
-      "secureNote": "تشفير بمستوى البنوك · ISO 27001"
+      "secureNote": "تشفير بمستوى البنوك · ISO 27001",
+      "profile": "الملف الشخصي",
+      "profileTitle": "الملف الشخصي للمستخدم",
+      "profileSubtitle": "إدارة معلوماتك الشخصية وتفضيلات منطقتك.",
+      "profileSave": "حفظ التغييرات",
+      "profileCity": "المدينة / المنطقة",
+      "profileAddress": "العنوان",
+      "profilePhone": "رقم الموبايل",
+      "profileSuccess": "تم تحديث الملف الشخصي بنجاح!",
+      "recommendedBranches": "موصى به لموقعك",
+      "otherBranches": "الفروع الأخرى",
+      "searchBranchesPlaceholder": "ابحث بالاسم، المدينة، أو العنوان..."
     },
     "steps": {
       "service": "الخدمة",

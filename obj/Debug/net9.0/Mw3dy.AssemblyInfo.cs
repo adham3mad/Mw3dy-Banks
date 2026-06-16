@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Mw3dy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b835ba054982128a7bf8c6c62365dfc35be5e564")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe2e471363a419ee0eeeb42a5daedbdd64d94223")]
 [assembly: System.Reflection.AssemblyProductAttribute("Mw3dy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Mw3dy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
