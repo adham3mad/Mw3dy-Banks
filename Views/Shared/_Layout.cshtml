@@ -1,7 +1,15 @@
 @inject Mw3dy.Services.LocalizationService Localizer
+@inject Mw3dy.Data.AppDbContext DbContext
 @{
     var culture = Localizer.GetCurrentCulture();
     var isRtl = culture == "ar";
+    int userId = 1;
+    if (Context.Request.Cookies.TryGetValue("mw3dy-user-id", out var idStr) && int.TryParse(idStr, out var id))
+    {
+        userId = id;
+    }
+    var currentUser = DbContext.Users.FirstOrDefault(u => u.Id == userId);
+    var isEmployee = currentUser?.IsEmployee ?? false;
 }
 <!DOCTYPE html>
 <html lang="@culture" dir="@(isRtl ? "rtl" : "ltr")" class="h-full">
@@ -41,26 +49,51 @@
                     <span>@(isRtl ? "English" : "العربية")</span>
                 </a>
 
-                <!-- Dashboard link -->
-                <a asp-controller="Dashboard" asp-action="Index" 
-                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
-                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
-                    <span>@Localizer.T("common.dashboard")</span>
-                </a>
+                <!-- Role / User Switcher -->
+                <div class="relative inline-block text-left mr-1 ml-1">
+                    <select onchange="window.location.href='/Home/SwitchUser?id=' + this.value" 
+                            class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/40 focus:outline-none transition-all cursor-pointer">
+                        <option value="1" selected="@(currentUser?.Id == 1)">👤 @Localizer.T("role.customer")</option>
+                        <option value="2" selected="@(currentUser?.Id == 2)">💼 @Localizer.T("role.employee")</option>
+                    </select>
+                </div>
 
-                <!-- Profile link -->
-                <a asp-controller="Dashboard" asp-action="Profile" 
-                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
-                    <i data-lucide="user" class="h-4 w-4"></i>
-                    <span>@Localizer.T("common.profile")</span>
-                </a>
+                @if (!isEmployee)
+                {
+                    <!-- Dashboard link -->
+                    <a asp-controller="Dashboard" asp-action="Index" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                        <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                        <span>@Localizer.T("common.dashboard")</span>
+                    </a>
 
-                <!-- Book link -->
-                <a asp-controller="Booking" asp-action="Index" 
-                   class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">
-                    <i data-lucide="plus" class="h-4 w-4"></i>
-                    <span>@Localizer.T("common.bookAppointment")</span>
-                </a>
+                    <!-- Profile link -->
+                    <a asp-controller="Dashboard" asp-action="Profile" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                        <i data-lucide="user" class="h-4 w-4"></i>
+                        <span>@Localizer.T("common.profile")</span>
+                    </a>
+                }
+
+                @if (isEmployee)
+                {
+                    <!-- Employee Portal link -->
+                    <a asp-controller="Employee" asp-action="Index" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                        <i data-lucide="briefcase" class="h-4 w-4"></i>
+                        <span>@Localizer.T("employee.portal")</span>
+                    </a>
+                }
+
+                @if (!isEmployee)
+                {
+                    <!-- Book link -->
+                    <a asp-controller="Booking" asp-action="Index" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        <span>@Localizer.T("common.bookAppointment")</span>
+                    </a>
+                }
             </nav>
         </div>
     </header>

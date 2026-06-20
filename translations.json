@@ -129,6 +129,38 @@
       "br6_city": "Queens, NY",
       "br6_address": "90-15 Queens Blvd",
       "br6_hours": "Sun–Thu · 9:30–17:00"
+    },
+    "employee": {
+      "dashboardTitle": "Employee Dashboard",
+      "dashboardSubtitle": "Manage branch operations and client appointments.",
+      "allBranches": "All Branches",
+      "allStatuses": "All Statuses",
+      "filterBranch": "Filter by Branch",
+      "filterStatus": "Filter by Status",
+      "searchPlaceholder": "Search customer name, email, phone or service...",
+      "statsTotal": "Total Visits",
+      "statsPending": "Confirmed",
+      "statsCompleted": "Completed",
+      "statsCancelled": "Cancelled",
+      "updateStatus": "Update Status",
+      "remarks": "Employee Remarks",
+      "saveSuccess": "Appointment updated successfully!",
+      "customerPhone": "Customer Phone",
+      "customerEmail": "Customer Email",
+      "customerCity": "Customer City",
+      "customerAddress": "Customer Address",
+      "actions": "Actions",
+      "noAppointmentsFound": "No appointments found matching current filters.",
+      "quickComplete": "Complete",
+      "quickCancel": "Cancel",
+      "employeeNotes": "Employee Remarks",
+      "writeRemarksPlaceholder": "Add any notes from the visit...",
+      "portal": "Employee Portal",
+      "backToCustomer": "Customer Area"
+    },
+    "role": {
+      "customer": "Customer Mode",
+      "employee": "Employee Mode"
     }
   },
   "ar": {
@@ -261,6 +293,38 @@
       "br6_city": "كوينز، نيويورك",
       "br6_address": "90-15 كوينز بوليفارد",
       "br6_hours": "الأحد–الخميس · 9:30–17:00"
+    },
+    "employee": {
+      "dashboardTitle": "لوحة تحكم الموظف",
+      "dashboardSubtitle": "إدارة عمليات الفرع ومواعيد العملاء.",
+      "allBranches": "جميع الفروع",
+      "allStatuses": "جميع الحالات",
+      "filterBranch": "تصفية حسب الفرع",
+      "filterStatus": "تصفية حسب الحالة",
+      "searchPlaceholder": "ابحث باسم العميل، البريد، الهاتف أو الخدمة...",
+      "statsTotal": "إجمالي الزيارات",
+      "statsPending": "مؤكدة",
+      "statsCompleted": "مكتملة",
+      "statsCancelled": "ملغاة",
+      "updateStatus": "تحديث الحالة",
+      "remarks": "ملاحظات الموظف",
+      "saveSuccess": "تم تحديث الموعد بنجاح!",
+      "customerPhone": "هاتف العميل",
+      "customerEmail": "بريد العميل",
+      "customerCity": "مدينة العميل",
+      "customerAddress": "عنوان العميل",
+      "actions": "إجراءات",
+      "noAppointmentsFound": "لا توجد مواعيد تطابق الفلاتر الحالية.",
+      "quickComplete": "إكمال الموعد",
+      "quickCancel": "إلغاء الموعد",
+      "employeeNotes": "ملاحظات الموظف",
+      "writeRemarksPlaceholder": "أضف أي ملاحظات حول الزيارة...",
+      "portal": "بوابة الموظف",
+      "backToCustomer": "منطقة العميل"
+    },
+    "role": {
+      "customer": "وضع العميل",
+      "employee": "وضع الموظف"
     }
   }
 }

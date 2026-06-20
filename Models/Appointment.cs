@@ -16,6 +16,7 @@ namespace Mw3dy.Models
         
         public string Status { get; set; } = "confirmed"; // confirmed | cancelled | completed
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string? EmployeeRemarks { get; set; }
 
         public int UserId { get; set; }
         public User User { get; set; } = null!;

@@ -1,0 +1,532 @@
+@model IEnumerable<Mw3dy.Models.Appointment>
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    ViewData["Title"] = Localizer.T("employee.dashboardTitle");
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+
+    var serviceIcons = new Dictionary<string, string>
+    {
+        { "account", "wallet" },
+        { "loan", "hand-coins" },
+        { "mortgage", "home" },
+        { "wealth", "trending-up" },
+        { "cards", "credit-card" },
+        { "business", "briefcase" }
+    };
+}
+
+<div class="min-h-screen bg-background">
+    <main class="container mx-auto px-4 md:px-8 py-8 md:py-12 space-y-8">
+        
+        <!-- Header Section -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-hero text-white p-7 md:p-10 shadow-elegant animate-fade-in">
+            <div class="absolute inset-0 bg-gradient-mesh opacity-50"></div>
+            <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-semibold text-white/90 mb-3 backdrop-blur-sm">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        @Localizer.T("employee.portal")
+                    </span>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">@Localizer.T("employee.dashboardTitle")</h1>
+                    <p class="mt-2 text-white/75 max-w-md text-sm">@Localizer.T("employee.dashboardSubtitle")</p>
+                    @if (ViewBag.EmployeeBranchName != null)
+                    {
+                        <div class="mt-3.5 flex items-center gap-1.5 text-xs font-semibold text-white bg-white/15 w-fit px-3 py-1.5 rounded-xl backdrop-blur-sm border border-white/10">
+                            <i data-lucide="map-pin" class="h-3.5 w-3.5 text-emerald-400"></i>
+                            <span>@ViewBag.EmployeeBranchName</span>
+                        </div>
+                    }
+                </div>
+                <div>
+                    <a asp-controller="Dashboard" asp-action="Index" 
+                       class="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white font-medium backdrop-blur-sm transition-all">
+                        <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                        <span>@Localizer.T("employee.backToCustomer")</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in" style="animation-delay: 100ms;">
+            <!-- Total -->
+            <div class="rounded-2xl border border-border bg-card p-5 shadow-soft flex items-center gap-4">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 text-primary">
+                    <i data-lucide="users" class="h-6 w-6"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-muted-foreground font-medium">@Localizer.T("employee.statsTotal")</div>
+                    <div id="stat-total" class="text-2xl font-bold text-foreground">@ViewBag.TotalCount</div>
+                </div>
+            </div>
+            <!-- Pending -->
+            <div class="rounded-2xl border border-border bg-card p-5 shadow-soft flex items-center gap-4">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                    <i data-lucide="clock" class="h-6 w-6"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-muted-foreground font-medium">@Localizer.T("employee.statsPending")</div>
+                    <div id="stat-pending" class="text-2xl font-bold text-foreground">@ViewBag.PendingCount</div>
+                </div>
+            </div>
+            <!-- Completed -->
+            <div class="rounded-2xl border border-border bg-card p-5 shadow-soft flex items-center gap-4">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                    <i data-lucide="check-circle-2" class="h-6 w-6"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-muted-foreground font-medium">@Localizer.T("employee.statsCompleted")</div>
+                    <div id="stat-completed" class="text-2xl font-bold text-foreground">@ViewBag.CompletedCount</div>
+                </div>
+            </div>
+            <!-- Cancelled -->
+            <div class="rounded-2xl border border-border bg-card p-5 shadow-soft flex items-center gap-4">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600">
+                    <i data-lucide="x-circle" class="h-6 w-6"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-muted-foreground font-medium">@Localizer.T("employee.statsCancelled")</div>
+                    <div id="stat-cancelled" class="text-2xl font-bold text-foreground">@ViewBag.CancelledCount</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section class="rounded-2xl border border-border bg-card/60 backdrop-blur p-4 shadow-soft animate-fade-in" style="animation-delay: 200ms;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Search Input -->
+                <div class="input-with-icon-wrapper">
+                    <div class="input-icon">
+                        <i data-lucide="search" class="h-4 w-4"></i>
+                    </div>
+                    <input type="text" id="search-filter" oninput="filterAppointments()" placeholder="@Localizer.T("employee.searchPlaceholder")"
+                           class="block w-full py-2.5 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm" />
+                </div>
+
+                <!-- Branch Filter -->
+                <div class="input-with-icon-wrapper @(ViewBag.EmployeeBranchId != null ? "opacity-70 pointer-events-none" : "")">
+                    <div class="input-icon">
+                        <i data-lucide="map-pin" class="h-4 w-4"></i>
+                    </div>
+                    <select id="branch-filter" onchange="filterAppointments()"
+                            class="block w-full py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm">
+                        @if (ViewBag.EmployeeBranchId == null)
+                        {
+                            <option value="">@Localizer.T("employee.allBranches")</option>
+                        }
+                        @foreach (var br in ViewBag.Branches)
+                        {
+                            var branchName = isRtl ? br.NameAr : br.NameEn;
+                            <option value="@br.Id" selected="@(ViewBag.EmployeeBranchId != null && (int)ViewBag.EmployeeBranchId == br.Id)">@branchName</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="input-with-icon-wrapper">
+                    <div class="input-icon">
+                        <i data-lucide="sliders" class="h-4 w-4"></i>
+                    </div>
+                    <select id="status-filter" onchange="filterAppointments()"
+                            class="block w-full py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm">
+                        <option value="">@Localizer.T("employee.allStatuses")</option>
+                        <option value="confirmed">@Localizer.T("status.confirmed")</option>
+                        <option value="completed">@Localizer.T("status.completed")</option>
+                        <option value="cancelled">@Localizer.T("status.cancelled")</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appointments List -->
+        <section class="animate-fade-in" style="animation-delay: 300ms;">
+            <div id="appointments-container" class="grid gap-4 md:grid-cols-2">
+                @foreach (var appt in Model)
+                {
+                    var icon = serviceIcons.GetValueOrDefault(appt.Service, "calendar");
+                    var searchTerms = $"{appt.User.Name.ToLower()} {appt.User.Email.ToLower()} {appt.User.Phone.ToLower()} {Localizer.T($"services.{appt.Service}").ToLower()}";
+                    var branchName = isRtl ? appt.Branch.NameAr : appt.Branch.NameEn;
+                    
+                    <article id="appt-card-@appt.Id" 
+                             data-branch-id="@appt.BranchId" 
+                             data-status="@appt.Status" 
+                             data-search="@searchTerms"
+                             class="appt-card rounded-2xl border border-border bg-gradient-card p-5 shadow-soft hover:shadow-md transition-all duration-300">
+                        
+                        <!-- Card Header -->
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shrink-0">
+                                    <i data-lucide="@icon" class="h-5 w-5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-foreground">@Localizer.T($"services.{appt.Service}")</h3>
+                                    <div class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                        <i data-lucide="map-pin" class="h-3.5 w-3.5"></i>
+                                        <span>@branchName</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Status Badge -->
+                            <span id="status-badge-@appt.Id" class="status-badge px-2.5 py-0.5 text-xs font-semibold rounded-full border-0
+                                  @(appt.Status == "confirmed" ? "bg-amber-100 text-amber-800" : 
+                                    appt.Status == "completed" ? "bg-emerald-100 text-emerald-800" : 
+                                    "bg-red-100 text-red-800")">
+                                @Localizer.T($"status.{appt.Status}")
+                            </span>
+                        </div>
+
+                        <!-- Customer Details Section -->
+                        <div class="mt-4 pt-3 border-t border-border/40 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                            <div class="flex items-center gap-2 text-muted-foreground">
+                                <i data-lucide="user" class="h-3.5 w-3.5 text-accent shrink-0"></i>
+                                <span class="font-semibold text-foreground truncate">@appt.User.Name</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-muted-foreground">
+                                <i data-lucide="phone" class="h-3.5 w-3.5 text-accent shrink-0"></i>
+                                <span class="font-medium text-foreground">@appt.User.Phone</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-muted-foreground sm:col-span-2">
+                                <i data-lucide="mail" class="h-3.5 w-3.5 text-accent shrink-0"></i>
+                                <span class="font-medium text-foreground truncate">@appt.User.Email</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-muted-foreground sm:col-span-2">
+                                <i data-lucide="navigation" class="h-3.5 w-3.5 text-accent shrink-0"></i>
+                                <span class="font-medium text-foreground truncate">@appt.User.City · @appt.User.Address</span>
+                            </div>
+                        </div>
+
+                        <!-- Appointment Time Details -->
+                        <div class="mt-3 bg-muted/40 p-2.5 rounded-xl border border-border/30 flex items-center justify-between text-xs text-muted-foreground">
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="h-3.5 w-3.5 text-accent"></i>
+                                <span class="font-semibold text-foreground">@appt.Date</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="clock" class="h-3.5 w-3.5 text-accent"></i>
+                                <span class="font-semibold text-foreground">@appt.Time</span>
+                            </div>
+                        </div>
+
+                        <!-- User Notes -->
+                        @if (!string.IsNullOrEmpty(appt.Notes))
+                        {
+                            <div class="mt-3 text-xs bg-card border border-border/50 p-2.5 rounded-xl text-muted-foreground">
+                                <span class="font-semibold text-foreground">@Localizer.T("common.notes"):</span>
+                                <p class="mt-0.5 text-foreground/80 leading-relaxed">@appt.Notes</p>
+                            </div>
+                        }
+
+                        <!-- Employee Remarks Section -->
+                        <div id="remarks-box-@appt.Id" class="remarks-box mt-3 text-xs bg-accent/5 border border-accent/20 p-2.5 rounded-xl text-accent @(string.IsNullOrEmpty(appt.EmployeeRemarks) ? "hidden" : "")">
+                            <span class="font-semibold flex items-center gap-1">
+                                <i data-lucide="message-square" class="h-3.5 w-3.5"></i>
+                                @Localizer.T("employee.employeeNotes")
+                            </span>
+                            <p id="remarks-text-@appt.Id" class="mt-0.5 text-foreground/90 font-medium leading-relaxed">@appt.EmployeeRemarks</p>
+                        </div>
+
+                        <!-- Actions Area -->
+                        <div class="mt-4 pt-3 border-t border-border/40 flex items-center justify-between gap-2">
+                            <div>
+                                <button type="button" onclick="openUpdateModal(@appt.Id, '@appt.Status', `@(appt.EmployeeRemarks ?? "")`)"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:bg-muted transition-colors">
+                                    <i data-lucide="edit-3" class="h-3.5 w-3.5"></i>
+                                    <span>@Localizer.T("employee.updateStatus")</span>
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-1">
+                                @if (appt.Status == "confirmed")
+                                {
+                                    <button type="button" onclick="quickUpdate(@appt.Id, 'completed')"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 hover:text-white transition-colors">
+                                        <i data-lucide="check" class="h-3.5 w-3.5"></i>
+                                        <span class="hidden sm:inline">@Localizer.T("employee.quickComplete")</span>
+                                    </button>
+                                    <button type="button" onclick="quickUpdate(@appt.Id, 'cancelled')"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white transition-colors">
+                                        <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                                        <span class="hidden sm:inline">@Localizer.T("employee.quickCancel")</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden rounded-2xl border border-dashed border-border p-12 text-center bg-card">
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent mb-3">
+                    <i data-lucide="inbox" class="h-6 w-6"></i>
+                </div>
+                <h3 class="font-bold text-foreground">@Localizer.T("employee.noAppointmentsFound")</h3>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Glassmorphism Update Modal -->
+<div id="update-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden animate-fade-in">
+    <div class="w-full max-w-md rounded-2xl border border-border bg-gradient-card p-6 shadow-elegant animate-scale-in relative">
+        <h3 class="text-lg font-bold text-foreground mb-4">@Localizer.T("employee.updateStatus")</h3>
+        
+        <form onsubmit="submitUpdate(event)" class="space-y-4">
+            <input type="hidden" id="modal-appt-id" />
+
+            <!-- Status Dropdown -->
+            <div>
+                <label for="modal-status" class="block text-xs font-semibold text-foreground mb-2">@Localizer.T("common.status")</label>
+                <div class="input-with-icon-wrapper">
+                    <div class="input-icon">
+                        <i data-lucide="sliders" class="h-4 w-4"></i>
+                    </div>
+                    <select id="modal-status" required
+                            class="block w-full py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm">
+                        <option value="confirmed">@Localizer.T("status.confirmed")</option>
+                        <option value="completed">@Localizer.T("status.completed")</option>
+                        <option value="cancelled">@Localizer.T("status.cancelled")</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Employee Remarks -->
+            <div>
+                <label for="modal-remarks" class="block text-xs font-semibold text-foreground mb-2">@Localizer.T("employee.remarks")</label>
+                <textarea id="modal-remarks" rows="4" placeholder="@Localizer.T("employee.writeRemarksPlaceholder")"
+                          class="block w-full px-3 py-2.5 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all text-sm resize-none"></textarea>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeUpdateModal()"
+                        class="inline-flex items-center justify-center h-10 px-4 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-sm transition-colors">
+                    @Localizer.T("common.cancel")
+                </button>
+                <button type="submit" id="modal-submit-btn"
+                        class="inline-flex items-center justify-center gap-1.5 h-10 px-5 bg-gradient-accent text-white font-bold rounded-xl hover:opacity-95 shadow-soft transition-all">
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    <span>@Localizer.T("common.confirm")</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+@section Scripts {
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById("search-filter");
+        const branchSelect = document.getElementById("branch-filter");
+        const statusSelect = document.getElementById("status-filter");
+        const cards = document.querySelectorAll(".appt-card");
+        const emptyState = document.getElementById("empty-state");
+
+        // Client-side filtering logic
+        function filterAppointments() {
+            const searchValue = searchInput.value.toLowerCase().trim();
+            const branchValue = branchSelect.value;
+            const statusValue = statusSelect.value;
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardBranchId = card.getAttribute("data-branch-id");
+                const cardStatus = card.getAttribute("data-status");
+                const cardSearch = card.getAttribute("data-search");
+
+                const matchesSearch = !searchValue || cardSearch.includes(searchValue);
+                const matchesBranch = !branchValue || cardBranchId === branchValue;
+                const matchesStatus = !statusValue || cardStatus === statusValue;
+
+                if (matchesSearch && matchesBranch && matchesStatus) {
+                    card.classList.remove("hidden");
+                    visibleCount++;
+                } else {
+                    card.classList.add("hidden");
+                }
+            });
+
+            if (visibleCount === 0) {
+                emptyState.classList.remove("hidden");
+            } else {
+                emptyState.classList.add("hidden");
+            }
+        }
+
+        // Modal Controls
+        function openUpdateModal(id, currentStatus, currentRemarks) {
+            document.getElementById("modal-appt-id").value = id;
+            document.getElementById("modal-status").value = currentStatus;
+            document.getElementById("modal-remarks").value = currentRemarks;
+
+            const modal = document.getElementById("update-modal");
+            modal.classList.remove("hidden");
+            // Refresh lucide icons inside modal if needed
+            lucide.createIcons();
+        }
+
+        function closeUpdateModal() {
+            document.getElementById("update-modal").classList.add("hidden");
+        }
+
+        // Show toast feedback
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-elegant bg-card border border-border/80 text-foreground pointer-events-auto transform translate-y-10 opacity-0 transition-all duration-300 ${type === "success" ? "border-l-4 border-l-emerald-500" : "border-l-4 border-l-red-500"}`;
+            
+            const icon = type === "success" ? '<i data-lucide="check-circle-2" class="h-5 w-5 text-emerald-500"></i>' : '<i data-lucide="x-circle" class="h-5 w-5 text-red-500"></i>';
+            toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ attrs: { class: 'h-5 w-5' } });
+            
+            setTimeout(() => {
+                toast.classList.remove("translate-y-10", "opacity-0");
+            }, 50);
+            
+            setTimeout(() => {
+                toast.classList.add("translate-y-10", "opacity-0");
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // AJAX update submit
+        function submitUpdate(e) {
+            e.preventDefault();
+            const id = document.getElementById("modal-appt-id").value;
+            const status = document.getElementById("modal-status").value;
+            const remarks = document.getElementById("modal-remarks").value;
+            const submitBtn = document.getElementById("modal-submit-btn");
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i data-lucide="loader" class="h-4 w-4 animate-spin"></i>';
+            lucide.createIcons();
+
+            sendUpdate(id, status, remarks, () => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i data-lucide="save" class="h-4 w-4"></i><span>@Html.Raw(Localizer.T("common.confirm").Replace("'", "\\'"))</span>';
+                closeUpdateModal();
+            });
+        }
+
+        function quickUpdate(id, targetStatus) {
+            sendUpdate(id, targetStatus, null);
+        }
+
+        function sendUpdate(id, status, remarks, callback = null) {
+            const payload = new URLSearchParams();
+            payload.append('id', id);
+            payload.append('status', status);
+            if (remarks !== null) {
+                payload.append('remarks', remarks);
+            }
+
+            fetch('@Url.Action("UpdateStatus", "Employee")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: payload
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (callback) callback();
+
+                if (data.success) {
+                    showToast("@Html.Raw(Localizer.T("employee.saveSuccess").Replace("\"", "\\\""))", "success");
+                    
+                    // Update DOM element state dynamically
+                    const card = document.getElementById(`appt-card-${id}`);
+                    if (card) {
+                        // Update status attribute
+                        card.setAttribute("data-status", status);
+                        
+                        // Update status badge UI
+                        const badge = document.getElementById(`status-badge-${id}`);
+                        if (badge) {
+                            badge.className = "status-badge px-2.5 py-0.5 text-xs font-semibold rounded-full border-0 " + 
+                                (status === "confirmed" ? "bg-amber-100 text-amber-800" : 
+                                 status === "completed" ? "bg-emerald-100 text-emerald-800" : 
+                                 "bg-red-100 text-red-800");
+                            
+                            // Set localized text dynamically based on current lang
+                            badge.innerText = status === "confirmed" ? "@Html.Raw(Localizer.T("status.confirmed").Replace("\"", "\\\""))" : 
+                                              status === "completed" ? "@Html.Raw(Localizer.T("status.completed").Replace("\"", "\\\""))" : 
+                                              "@Html.Raw(Localizer.T("status.cancelled").Replace("\"", "\\\""))";
+                        }
+
+                        // Update remarks UI
+                        const remarksBox = document.getElementById(`remarks-box-${id}`);
+                        const remarksText = document.getElementById(`remarks-text-${id}`);
+                        if (remarks !== null) {
+                            if (remarks.trim() !== "") {
+                                remarksBox.classList.remove("hidden");
+                                remarksText.innerText = remarks;
+                            } else {
+                                remarksBox.classList.add("hidden");
+                                remarksText.innerText = "";
+                            }
+                        }
+
+                        // Animate card highlight
+                        card.classList.add("ring-2", "ring-accent/30");
+                        setTimeout(() => {
+                            card.classList.remove("ring-2", "ring-accent/30");
+                        }, 1000);
+                        
+                        // Hide quick buttons if status is no longer confirmed
+                        const actionsArea = card.querySelector(".flex.items-center.gap-1");
+                        if (actionsArea) {
+                            if (status !== "confirmed") {
+                                actionsArea.classList.add("hidden");
+                            } else {
+                                actionsArea.classList.remove("hidden");
+                            }
+                        }
+
+                        // Re-calculate statistics on UI
+                        recalculateStats();
+                        filterAppointments();
+                    }
+                } else {
+                    showToast(data.message || "Failed to update appointment", "error");
+                }
+            })
+            .catch(err => {
+                if (callback) callback();
+                console.error("Update error:", err);
+                showToast("An error occurred", "error");
+            });
+        }
+
+        function recalculateStats() {
+            const allCards = document.querySelectorAll(".appt-card");
+            let total = allCards.length;
+            let pending = 0;
+            let completed = 0;
+            let cancelled = 0;
+
+            allCards.forEach(c => {
+                const s = c.getAttribute("data-status");
+                if (s === "confirmed") pending++;
+                else if (s === "completed") completed++;
+                else if (s === "cancelled") cancelled++;
+            });
+
+            document.getElementById("stat-total").innerText = total;
+            document.getElementById("stat-pending").innerText = pending;
+            document.getElementById("stat-completed").innerText = completed;
+            document.getElementById("stat-cancelled").innerText = cancelled;
+        }
+    </script>
+}

@@ -10,8 +10,18 @@ namespace Mw3dy.Controllers
     public class DashboardController : Controller
     {
         private readonly AppDbContext _context;
-        // Static ID for default user Adham Emad
-        private readonly int _defaultUserId = 1;
+
+        private int CurrentUserId
+        {
+            get
+            {
+                if (Request.Cookies.TryGetValue("mw3dy-user-id", out var idStr) && int.TryParse(idStr, out var id))
+                {
+                    return id;
+                }
+                return 1;
+            }
+        }
 
         public DashboardController(AppDbContext context)
         {
@@ -21,18 +31,23 @@ namespace Mw3dy.Controllers
         public IActionResult Index()
         {
             // Verify default user exists (it is seeded, but safety check)
-            var user = _context.Users.FirstOrDefault(u => u.Id == _defaultUserId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
             if (user == null)
             {
                 // Re-seed if missing
-                user = new User { Id = _defaultUserId, Name = "Adham Emad", Email = "adham@mw3dy.com" };
+                user = new User { Id = CurrentUserId, Name = "Adham Emad", Email = "adham@mw3dy.com" };
                 _context.Users.Add(user);
                 _context.SaveChanges();
             }
 
+            if (user.IsEmployee)
+            {
+                return RedirectToAction("Index", "Employee");
+            }
+
             // Fetch appointments
             var appointments = _context.Appointments
-                .Where(a => a.UserId == _defaultUserId)
+                .Where(a => a.UserId == CurrentUserId)
                 .Include(a => a.Branch)
                 .ToList();
 
@@ -45,7 +60,7 @@ namespace Mw3dy.Controllers
         [HttpPost]
         public IActionResult Cancel(int id)
         {
-            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id && a.UserId == _defaultUserId);
+            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id && a.UserId == CurrentUserId);
             if (appointment != null)
             {
                 appointment.Status = "cancelled";
@@ -71,12 +86,12 @@ namespace Mw3dy.Controllers
         [HttpGet]
         public IActionResult Profile()
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == _defaultUserId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
             if (user == null)
             {
                 user = new User 
                 { 
-                    Id = _defaultUserId, 
+                    Id = CurrentUserId, 
                     Name = "Adham Emad", 
                     Email = "adham@mw3dy.com",
                     City = "Brooklyn, NY",
@@ -84,6 +99,11 @@ namespace Mw3dy.Controllers
                 };
                 _context.Users.Add(user);
                 _context.SaveChanges();
+            }
+
+            if (user.IsEmployee)
+            {
+                return RedirectToAction("Index", "Employee");
             }
 
             var cities = _context.Branches
@@ -100,10 +120,15 @@ namespace Mw3dy.Controllers
         [HttpPost]
         public IActionResult Profile(string name, string email, string phone, string city, string address)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == _defaultUserId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
             if (user == null)
             {
                 return NotFound();
+            }
+
+            if (user.IsEmployee)
+            {
+                return RedirectToAction("Index", "Employee");
             }
 
             user.Name = name ?? string.Empty;

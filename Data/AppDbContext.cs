@@ -32,19 +32,29 @@ namespace Mw3dy.Data
                 .HasForeignKey(a => a.BranchId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Default User Id
-            var defaultUserId = 1;
-
-            // Seed User
+            // Seed Users
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
-                    Id = defaultUserId,
+                    Id = 1,
                     Name = "Adham Emad",
                     Email = "adham@mw3dy.com",
                     Phone = "01012345678",
                     City = "New Cairo",
-                    Address = "53 شارع الثورة، مصر الجديدة"
+                    Address = "53 شارع الثورة، مصر الجديدة",
+                    IsEmployee = false,
+                    BranchId = null
+                },
+                new User
+                {
+                    Id = 2,
+                    Name = "Hazem Ahmed",
+                    Email = "hazem@mw3dy.com",
+                    Phone = "01087654321",
+                    City = "Heliopolis",
+                    Address = "Roxy, Cairo",
+                    IsEmployee = true,
+                    BranchId = 2 // Banque Misr - Heliopolis
                 }
             );
 

@@ -9,7 +9,18 @@ namespace Mw3dy.Controllers
     public class BookingController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly int _defaultUserId = 1;
+
+        private int CurrentUserId
+        {
+            get
+            {
+                if (Request.Cookies.TryGetValue("mw3dy-user-id", out var idStr) && int.TryParse(idStr, out var id))
+                {
+                    return id;
+                }
+                return 1;
+            }
+        }
 
         public BookingController(AppDbContext context)
         {
@@ -18,6 +29,13 @@ namespace Mw3dy.Controllers
 
         public IActionResult Index()
         {
+            // Get user info
+            var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
+            if (user != null && user.IsEmployee)
+            {
+                return RedirectToAction("Index", "Employee");
+            }
+
             // Pass branches to the view
             var branches = _context.Branches.OrderBy(b => b.DistanceKm).ToList();
             ViewBag.Branches = branches;
@@ -26,8 +44,6 @@ namespace Mw3dy.Controllers
             var services = _context.Services.ToList();
             ViewBag.Services = services;
 
-            // Get user info
-            var user = _context.Users.FirstOrDefault(u => u.Id == _defaultUserId);
             ViewBag.UserName = user?.Name ?? "Adham Emad";
             ViewBag.UserCity = user?.City ?? string.Empty;
             ViewBag.UserPhone = user?.Phone ?? string.Empty;
@@ -61,7 +77,7 @@ namespace Mw3dy.Controllers
                 Notes = dto.Notes,
                 Status = "confirmed",
                 CreatedAt = DateTime.UtcNow,
-                UserId = _defaultUserId
+                UserId = CurrentUserId
             };
 
             _context.Appointments.Add(appointment);

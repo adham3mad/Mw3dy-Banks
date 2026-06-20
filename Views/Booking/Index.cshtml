@@ -400,15 +400,15 @@
                 var titleKey = $"services.{s.Id}";
                 var titleTranslated = Localizer.T(titleKey);
                 var displayTitle = titleTranslated != titleKey ? titleTranslated : s.Title;
-                <text>"@s.Id": { title: "@displayTitle.Replace("'", "\\'")", icon: "@s.Icon" },</text>
+                <text>"@s.Id": { title: "@Html.Raw(displayTitle.Replace("'", "\\'"))", icon: "@s.Icon" },</text>
             }
         };
 
         const titles = [
-            { title: "@Localizer.T("steps.selectService")", desc: "@Localizer.T("steps.selectServiceDesc")" },
-            { title: "@Localizer.T("steps.selectBranch")", desc: "@Localizer.T("steps.selectBranchDesc")" },
-            { title: "@Localizer.T("steps.selectDateTime")", desc: "@Localizer.T("steps.selectDateTimeDesc")" },
-            { title: "@Localizer.T("steps.review")", desc: "@Localizer.T("steps.reviewDesc")" }
+            { title: "@Html.Raw(Localizer.T("steps.selectService").Replace("\"", "\\\""))", desc: "@Html.Raw(Localizer.T("steps.selectServiceDesc").Replace("\"", "\\\""))" },
+            { title: "@Html.Raw(Localizer.T("steps.selectBranch").Replace("\"", "\\\""))", desc: "@Html.Raw(Localizer.T("steps.selectBranchDesc").Replace("\"", "\\\""))" },
+            { title: "@Html.Raw(Localizer.T("steps.selectDateTime").Replace("\"", "\\\""))", desc: "@Html.Raw(Localizer.T("steps.selectDateTimeDesc").Replace("\"", "\\\""))" },
+            { title: "@Html.Raw(Localizer.T("steps.review").Replace("\"", "\\\""))", desc: "@Html.Raw(Localizer.T("steps.reviewDesc").Replace("\"", "\\\""))" }
         ];
 
         // Language properties
@@ -432,56 +432,54 @@
         // ---------------- WIZARD CONTROLLER ----------------
 
         function selectService(btn, id) {
+            if (typeof btn === 'string' && id === undefined) {
+                id = btn;
+                btn = document.getElementById(`svc-btn-${id}`);
+            }
             selectedService = id;
             
             // Highlight selected service card
             document.querySelectorAll('.service-card').forEach(card => {
                 card.classList.remove('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
-                card.querySelector('.check-icon').classList.add('hidden');
-                card.querySelector('.service-icon-wrapper').classList.remove('bg-accent');
-                card.querySelector('.service-icon-wrapper').classList.add('bg-primary');
+                const check = card.querySelector('.check-icon');
+                if (check) check.classList.add('hidden');
+                const iconWrap = card.querySelector('.service-icon-wrapper');
+                if (iconWrap) {
+                    iconWrap.classList.remove('bg-accent');
+                    iconWrap.classList.add('bg-primary');
+                }
             });
 
-            if (btn) {
+            if (btn && btn.classList) {
                 btn.classList.add('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
-                btn.querySelector('.check-icon').classList.remove('hidden');
-                btn.querySelector('.service-icon-wrapper').classList.remove('bg-primary');
-                btn.querySelector('.service-icon-wrapper').classList.add('bg-accent');
+                const check = btn.querySelector('.check-icon');
+                if (check) check.classList.remove('hidden');
+                const iconWrap = btn.querySelector('.service-icon-wrapper');
+                if (iconWrap) {
+                    iconWrap.classList.remove('bg-primary');
+                    iconWrap.classList.add('bg-accent');
+                }
             }
 
             validateStep();
         }
 
-        function selectBranch(btn, id) {
-            selectedBranchId = id;
-            // Get branch info from button dataset or DOM attributes
-            const card = btn;
-            if (card) {
-                // Look for Name and Address
-                const h3 = card.querySelector('h3');
-                const addressSpan = card.querySelector('span'); // First span is address
-                selectedBranchName = h3 ? h3.textContent.trim() : "";
-                // Let's get address from specific class or index if needed, but it's simpler to use the parameters passed:
-            }
-
-            // Let's just use the parameters we pass in!
-            // Wait, we can keep using parameters from onclick
-        }
-
         function selectBranch(btn, id, name, address) {
             selectedBranchId = id;
-            selectedBranchName = name;
-            selectedBranchAddress = address;
+            selectedBranchName = name || "";
+            selectedBranchAddress = address || "";
 
             // Highlight selected branch card
             document.querySelectorAll('.branch-card').forEach(card => {
                 card.classList.remove('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
-                card.querySelector('.check-icon').classList.add('hidden');
+                const check = card.querySelector('.check-icon');
+                if (check) check.classList.add('hidden');
             });
 
-            if (btn) {
+            if (btn && btn.classList) {
                 btn.classList.add('border-accent', 'bg-accent/5', 'ring-2', 'ring-accent/30', 'shadow-soft');
-                btn.querySelector('.check-icon').classList.remove('hidden');
+                const check = btn.querySelector('.check-icon');
+                if (check) check.classList.remove('hidden');
             }
 
             validateStep();
@@ -589,11 +587,11 @@
             const nextArrowIcon = document.getElementById('next-arrow-icon');
             
             if (currentStep === 3) {
-                nextBtnText.textContent = "@Localizer.T("common.confirmBooking")";
+                nextBtnText.textContent = "@Html.Raw(Localizer.T("common.confirmBooking").Replace("\"", "\\\""))";
                 nextArrowIcon.setAttribute('data-lucide', 'check-circle-2');
                 nextArrowIcon.className = "h-4 w-4";
             } else {
-                nextBtnText.textContent = "@Localizer.T("common.next")";
+                nextBtnText.textContent = "@Html.Raw(Localizer.T("common.next").Replace("\"", "\\\""))";
                 nextArrowIcon.setAttribute('data-lucide', 'arrow-right');
                 nextArrowIcon.className = `h-4 w-4 ${isRtl ? "rotate-180" : ""}`;
             }
@@ -662,7 +660,10 @@
 
             const nextBtn = document.getElementById('next-btn');
             nextBtn.disabled = true;
-            nextBtn.textContent = "@Localizer.T("common.loading")";
+            const nextBtnText = document.getElementById('next-btn-text');
+            if (nextBtnText) {
+                nextBtnText.textContent = "@Html.Raw(Localizer.T("common.loading").Replace("\"", "\\\""))";
+            }
 
             fetch('@Url.Action("Confirm", "Booking")', {
                 method: 'POST',
@@ -679,14 +680,22 @@
                     triggerConfetti();
 
                     // Show success toast
-                    showToast("@Localizer.T("common.bookingConfirmed")", "success");
+                    showToast("@Html.Raw(Localizer.T("common.bookingConfirmed").Replace("\"", "\\\""))", "success");
 
                     // Move to done screen
                     currentStep = 4;
                     updateWizardUI();
                 } else {
                     nextBtn.disabled = false;
-                    nextBtn.innerHTML = `<span>@Localizer.T("common.confirmBooking")</span> <i data-lucide="check-circle-2" class="h-4 w-4"></i>`;
+                    const btnText = document.getElementById('next-btn-text');
+                    if (btnText) {
+                        btnText.textContent = "@Html.Raw(Localizer.T("common.confirmBooking").Replace("\"", "\\\""))";
+                    }
+                    const btnIcon = document.getElementById('next-arrow-icon');
+                    if (btnIcon) {
+                        btnIcon.setAttribute('data-lucide', 'check-circle-2');
+                        btnIcon.className = "h-4 w-4";
+                    }
                     lucide.createIcons();
                     showToast(data.message || (isRtl ? "فشل الحجز" : "Booking failed"), "error");
                 }
@@ -695,7 +704,15 @@
                 console.error("Booking error:", err);
                 if (overlay) overlay.classList.add('hidden');
                 nextBtn.disabled = false;
-                nextBtn.innerHTML = `<span>@Localizer.T("common.confirmBooking")</span> <i data-lucide="check-circle-2" class="h-4 w-4"></i>`;
+                const btnText = document.getElementById('next-btn-text');
+                if (btnText) {
+                    btnText.textContent = "@Html.Raw(Localizer.T("common.confirmBooking").Replace("\"", "\\\""))";
+                }
+                const btnIcon = document.getElementById('next-arrow-icon');
+                if (btnIcon) {
+                    btnIcon.setAttribute('data-lucide', 'check-circle-2');
+                    btnIcon.className = "h-4 w-4";
+                }
                 lucide.createIcons();
                 showToast(isRtl ? "حدث خطأ أثناء الحجز" : "An error occurred during booking", "error");
             });

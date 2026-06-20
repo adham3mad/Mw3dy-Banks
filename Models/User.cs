@@ -10,6 +10,9 @@ namespace Mw3dy.Models
         public string Phone { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
+        public bool IsEmployee { get; set; } = false;
+        public int? BranchId { get; set; }
+        public Branch? Branch { get; set; }
 
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }
