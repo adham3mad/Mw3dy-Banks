@@ -15,13 +15,16 @@ namespace Mw3dy.Controllers
             : base(context, configuration)
         {
             _logger = logger;
-        }
+        }   
 
         public IActionResult Index()
         {
-            if (CurrentUser != null && IsEmployee)
+            if (CurrentUser != null)
             {
-                return RedirectToAction("Index", "Employee");
+                if (IsEmployee)
+                    return RedirectToAction("Index", "Employee");
+                else
+                    return RedirectToAction("Index", "Dashboard");
             }
             return View();
         }

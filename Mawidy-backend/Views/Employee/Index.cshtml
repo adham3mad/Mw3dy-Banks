@@ -231,20 +231,17 @@
                                 </button>
                             </div>
 
-                            <div class="flex items-center gap-1">
-                                @if (appt.Status == "confirmed")
-                                {
-                                    <button type="button" onclick="quickUpdate(@appt.Id, 'completed')"
-                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 hover:text-white transition-colors">
-                                        <i data-lucide="check" class="h-3.5 w-3.5"></i>
-                                        <span class="hidden sm:inline">@Localizer.T("employee.quickComplete")</span>
-                                    </button>
-                                    <button type="button" onclick="quickUpdate(@appt.Id, 'cancelled')"
-                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white transition-colors">
-                                        <i data-lucide="x" class="h-3.5 w-3.5"></i>
-                                        <span class="hidden sm:inline">@Localizer.T("employee.quickCancel")</span>
-                                    </button>
-                                }
+                            <div id="quick-actions-@appt.Id" class="flex items-center gap-1 @(appt.Status != "confirmed" ? "hidden" : "")">
+                                <button type="button" onclick="quickUpdate(@appt.Id, 'completed')"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 hover:text-white transition-colors">
+                                    <i data-lucide="check" class="h-3.5 w-3.5"></i>
+                                    <span class="hidden sm:inline">@Localizer.T("employee.quickComplete")</span>
+                                </button>
+                                <button type="button" onclick="quickUpdate(@appt.Id, 'cancelled')"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white transition-colors">
+                                    <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                                    <span class="hidden sm:inline">@Localizer.T("employee.quickCancel")</span>
+                                </button>
                             </div>
                         </div>
                     </article>
@@ -319,7 +316,8 @@
         const searchInput = document.getElementById("search-filter");
         const branchSelect = document.getElementById("branch-filter");
         const statusSelect = document.getElementById("status-filter");
-        const cards = document.querySelectorAll(".appt-card");
+        // NOTE: do NOT cache cards here — query live inside filterAppointments so
+        // newly injected SignalR cards and status changes are always picked up.
         const emptyState = document.getElementById("empty-state");
 
         // Client-side filtering logic
@@ -329,7 +327,8 @@
             const statusValue = statusSelect.value;
             let visibleCount = 0;
 
-            cards.forEach(card => {
+            // Query live every time so updated data-status attrs and new SignalR cards are included
+            document.querySelectorAll(".appt-card").forEach(card => {
                 const cardBranchId = card.getAttribute("data-branch-id");
                 const cardStatus = card.getAttribute("data-status");
                 const cardSearch = card.getAttribute("data-search");
@@ -478,8 +477,8 @@
                             card.classList.remove("ring-2", "ring-accent/30");
                         }, 1000);
                         
-                        // Hide quick buttons if status is no longer confirmed
-                        const actionsArea = card.querySelector(".flex.items-center.gap-1");
+                        // Show/hide quick buttons based on new status
+                        const actionsArea = document.getElementById(`quick-actions-${id}`);
                         if (actionsArea) {
                             if (status !== "confirmed") {
                                 actionsArea.classList.add("hidden");
@@ -661,7 +660,7 @@
                             </button>
                         </div>
 
-                        <div class="flex items-center gap-1">
+                        <div id="quick-actions-${booking.id}" class="flex items-center gap-1 ${booking.status !== 'confirmed' ? 'hidden' : ''}">
                             <button type="button" onclick="quickUpdate(${booking.id}, 'completed')"
                                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 hover:text-white transition-colors">
                                 <i data-lucide="check" class="h-3.5 w-3.5"></i>

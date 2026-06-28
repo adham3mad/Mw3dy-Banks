@@ -326,13 +326,26 @@
                 if (data.success) {
                     showToast("@Localizer.T("common.bookingCancelled")", "success");
                     
-                    // Animate card removal/fading
+                    // Remove card from DOM immediately — no page reload needed
                     const card = document.getElementById(`appt-card-${id}`);
                     if (card) {
-                        card.classList.add("opacity-50", "scale-95");
+                        card.style.transition = "opacity 0.3s, transform 0.3s";
+                        card.style.opacity = "0";
+                        card.style.transform = "scale(0.95)";
                         setTimeout(() => {
-                            // Reload page to update the upcoming/past lists
-                            window.location.reload();
+                            card.remove();
+                            // Update upcoming count badge
+                            const countBadge = document.getElementById("upcoming-count");
+                            if (countBadge) {
+                                const current = parseInt(countBadge.textContent) || 1;
+                                countBadge.textContent = Math.max(0, current - 1);
+                            }
+                            // Show empty state if no cards left
+                            const grid = document.getElementById("upcoming-grid");
+                            if (grid && grid.querySelectorAll("article").length === 0) {
+                                grid.innerHTML = `<div class="rounded-2xl border border-dashed border-border p-10 text-center bg-card col-span-2"><p class="text-sm text-muted-foreground">@Localizer.T("common.noAppointmentsDesc")</p></div>`;
+                            }
+                        }, 350);
                         }, 500);
                     }
                 } else {
