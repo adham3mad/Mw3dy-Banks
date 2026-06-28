@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawidy - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <a href="../index.html" class="flex items-center gap-2.5 group">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground" data-translate="common.appName">موعدي</span>
+            </a>
+
+            <!-- Nav Elements -->
+            <nav class="flex items-center gap-2">
+                <button onclick="toggleLang()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="languages" class="h-4 w-4"></i>
+                    <span id="langBtnText">English</span>
+                </button>
+                <a href="../index.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="log-out" class="h-4 w-4"></i>
+                    <span data-translate="common.signOut">تسجيل الخروج</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 md:px-8 py-10 max-w-5xl">
+        <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-foreground" data-translate="employee.portal">بوابة إدارة المواعيد</h1>
+                <p class="text-sm text-muted-foreground mt-2">إدارة وتأكيد مواعيد المرضى في فرعك الفعال.</p>
+            </div>
+            
+            <!-- Statistics Cards -->
+            <div class="flex gap-4">
+                <div class="bg-card border border-border p-4 rounded-2xl shadow-soft min-w-[100px] text-center">
+                    <div class="text-2xl font-black text-accent">15</div>
+                    <div class="text-2xs text-muted-foreground uppercase font-bold mt-1">إجمالي الحجوزات</div>
+                </div>
+                <div class="bg-card border border-border p-4 rounded-2xl shadow-soft min-w-[100px] text-center">
+                    <div class="text-2xl font-black text-emerald-500">12</div>
+                    <div class="text-2xs text-muted-foreground uppercase font-bold mt-1">مكتملة</div>
+                </div>
+                <div class="bg-card border border-border p-4 rounded-2xl shadow-soft min-w-[100px] text-center">
+                    <div class="text-2xl font-black text-amber-500">3</div>
+                    <div class="text-2xs text-muted-foreground uppercase font-bold mt-1">قيد الانتظار</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="bg-card border border-border/80 rounded-3xl overflow-hidden shadow-elegant">
+            <div class="p-6 border-b border-border/60 flex items-center justify-between">
+                <h3 class="font-bold text-lg text-foreground">الحجوزات النشطة اليوم</h3>
+                <div class="flex items-center gap-2">
+                    <select class="h-9 px-3 rounded-xl border border-border bg-background text-xs font-semibold focus:outline-none">
+                        <option>جميع الفروع</option>
+                        <option>فرع التجمع الخامس</option>
+                        <option>فرع المهندسين</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-start border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-muted/40 text-muted-foreground border-b border-border/60 text-xs font-bold">
+                            <th class="p-4 text-start">المريض</th>
+                            <th class="p-4 text-start">الخدمة</th>
+                            <th class="p-4 text-start">الفرع</th>
+                            <th class="p-4 text-start">الوقت والتاريخ</th>
+                            <th class="p-4 text-start">الحالة</th>
+                            <th class="p-4 text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border/40">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-muted/10 transition-colors">
+                            <td class="p-4">
+                                <div class="font-bold text-foreground">محمد أحمد</div>
+                                <div class="text-2xs text-muted-foreground">01099887766</div>
+                            </td>
+                            <td class="p-4 font-semibold text-xs">عيادة تخصصية (Specialty)</td>
+                            <td class="p-4 text-xs text-muted-foreground">فرع التجمع الخامس</td>
+                            <td class="p-4">
+                                <div class="font-bold text-xs text-foreground">2026-06-29</div>
+                                <div class="text-2xs text-muted-foreground">10:00 AM</div>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-2xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">انتظار</span>
+                            </td>
+                            <td class="p-4 text-center">
+                                <div class="inline-flex gap-1.5">
+                                    <button onclick="updateStatus(this, 'completed')" class="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/25 flex items-center justify-center transition-colors" title="إكمال"><i data-lucide="check" class="h-4 w-4"></i></button>
+                                    <button onclick="updateStatus(this, 'cancelled')" class="h-8 w-8 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/25 flex items-center justify-center transition-colors" title="إلغاء"><i data-lucide="x" class="h-4 w-4"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-muted/10 transition-colors">
+                            <td class="p-4">
+                                <div class="font-bold text-foreground">سارة يوسف</div>
+                                <div class="text-2xs text-muted-foreground">01233445566</div>
+                            </td>
+                            <td class="p-4 font-semibold text-xs">استشارة عامة (General)</td>
+                            <td class="p-4 text-xs text-muted-foreground">فرع المهندسين</td>
+                            <td class="p-4">
+                                <div class="font-bold text-xs text-foreground">2026-06-29</div>
+                                <div class="text-2xs text-muted-foreground">12:30 PM</div>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-2xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">مكتمل</span>
+                            </td>
+                            <td class="p-4 text-center">
+                                <span class="text-2xs text-muted-foreground font-medium">لا توجد إجراءات</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-border/60 py-8 bg-card text-center text-xs text-muted-foreground">
+        © 2026 موعدي - Mw3dy · جميع الحقوق محفوظة
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script>
+        function toggleLang() {
+            const nextLang = currentLanguage === 'ar' ? 'en' : 'ar';
+            setLanguage(nextLang);
+            document.getElementById('langBtnText').innerText = nextLang === 'ar' ? 'English' : 'العربية';
+        }
+
+        function updateStatus(btn, status) {
+            const row = btn.closest('tr');
+            const statusCell = row.querySelector('td:nth-child(5)');
+            const actionCell = row.querySelector('td:nth-child(6)');
+
+            if (status === 'completed') {
+                statusCell.innerHTML = `<span class="text-2xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">${currentLanguage === 'ar' ? 'مكتمل' : 'Completed'}</span>`;
+            } else {
+                statusCell.innerHTML = `<span class="text-2xs font-semibold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20">${currentLanguage === 'ar' ? 'ملغي' : 'Cancelled'}</span>`;
+            }
+            actionCell.innerHTML = `<span class="text-2xs text-muted-foreground font-medium">${currentLanguage === 'ar' ? 'لا توجد إجراءات' : 'No Actions'}</span>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Because this file is in a subdirectory, adjust logo/nav paths dynamically if needed
+            document.getElementById('langBtnText').innerText = currentLanguage === 'ar' ? 'English' : 'العربية';
+        });
+    </script>
+</body>
+</html>

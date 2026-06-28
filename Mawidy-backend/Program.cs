@@ -21,6 +21,20 @@ builder.Services.AddHttpContextAccessor();
 // Register Custom Localization Service
 builder.Services.AddSingleton<LocalizationService>();
 
+// Add SignalR
+builder.Services.AddSignalR();
+
+// Add CORS support
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Automatically Ensure Database is Created & Seeded on Startup
@@ -54,7 +68,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
+
+// Map SignalR Hubs
+app.MapHub<Mw3dy.Hubs.BookingHub>("/bookingHub");
 
 app.MapControllerRoute(
     name: "default",

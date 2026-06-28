@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawidy - My Appointments</title>
+    <link class="stylesheet" href="css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center gap-2.5 group">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground" data-translate="common.appName">موعدي</span>
+            </a>
+
+            <!-- Nav Elements -->
+            <nav class="flex items-center gap-2">
+                <button onclick="toggleLang()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="languages" class="h-4 w-4"></i>
+                    <span id="langBtnText">English</span>
+                </button>
+                <a href="profile.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="user" class="h-4 w-4"></i>
+                    <span data-translate="common.profile">الملف الشخصي</span>
+                </a>
+                <a href="appointments.html" class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    <span data-translate="common.bookAppointment">احجز موعداً</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 md:px-8 py-10 max-w-4xl">
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-foreground" data-translate="common.dashboard">حجوزاتي</h1>
+            <p class="text-sm text-muted-foreground mt-2">استعرض وراجع مواعيدك الطبية الحالية والسابقة.</p>
+        </div>
+
+        <!-- Appointments List -->
+        <div class="space-y-4" id="appointments-container">
+            <!-- Mock Appointment 1 -->
+            <div class="bg-card border border-border/80 rounded-2xl p-5 shadow-soft flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="h-12 w-12 rounded-xl bg-accent/15 text-accent flex items-center justify-center">
+                        <i data-lucide="calendar" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-base text-foreground">استشارة تخصصية (Specialty Clinic)</h4>
+                        <div class="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                            <span class="flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i> فرع التجمع الخامس</span>
+                            <span class="flex items-center gap-1"><i data-lucide="clock" class="h-3.5 w-3.5"></i> 10:00 AM - 10:30 AM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">مؤكد</span>
+                    <button onclick="cancelAppointment(1, this)" class="h-9 px-4 rounded-xl text-xs font-semibold border border-destructive/20 text-destructive hover:bg-destructive/5 transition-colors">إلغاء الموعد</button>
+                </div>
+            </div>
+
+            <!-- Mock Appointment 2 -->
+            <div class="bg-card border border-border/80 rounded-2xl p-5 shadow-soft flex flex-wrap items-center justify-between gap-4 opacity-75">
+                <div class="flex items-center gap-4">
+                    <div class="h-12 w-12 rounded-xl bg-muted text-muted-foreground flex items-center justify-center">
+                        <i data-lucide="calendar-check-2" class="h-6 w-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-base text-foreground">استشارة عامة (General Consultation)</h4>
+                        <div class="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                            <span class="flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i> فرع المهندسين</span>
+                            <span class="flex items-center gap-1"><i data-lucide="clock" class="h-3.5 w-3.5"></i> 02:00 PM - 02:30 PM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-muted text-muted-foreground">مكتمل</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-border/60 py-8 bg-card text-center text-xs text-muted-foreground">
+        © 2026 موعدي - Mw3dy · جميع الحقوق محفوظة
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        function toggleLang() {
+            const nextLang = currentLanguage === 'ar' ? 'en' : 'ar';
+            setLanguage(nextLang);
+            document.getElementById('langBtnText').innerText = nextLang === 'ar' ? 'English' : 'العربية';
+        }
+
+        function cancelAppointment(id, btn) {
+            if (confirm(currentLanguage === 'ar' ? 'هل أنت متأكد من إلغاء هذا الموعد؟' : 'Are you sure you want to cancel this appointment?')) {
+                // If running, we could send it to API. In mock mode, we just update UI.
+                btn.closest('.bg-card').remove();
+                alert(currentLanguage === 'ar' ? 'تم إلغاء الموعد بنجاح.' : 'Appointment cancelled successfully.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('langBtnText').innerText = currentLanguage === 'ar' ? 'English' : 'العربية';
+        });
+    </script>
+</body>
+</html>

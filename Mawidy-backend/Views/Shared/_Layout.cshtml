@@ -1,0 +1,227 @@
+@inject Mw3dy.Services.LocalizationService Localizer
+@inject Mw3dy.Data.AppDbContext DbContext
+@{
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+    
+    // Retrieve authenticated user info from ViewBag (set by BaseController)
+    var currentUser = ViewBag.CurrentUser as Mw3dy.Models.User;
+    var isEmployee = ViewBag.IsEmployee as bool? ?? false;
+    var currentUserId = ViewBag.CurrentUserId as int? ?? 1;
+}
+<!DOCTYPE html>
+<html lang="@culture" dir="@(isRtl ? "rtl" : "ltr")" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @Localizer.T("common.appName")</title>
+    
+    <!-- Tailwind compiled stylesheet -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <!-- Logo -->
+            <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2.5 group" aria-label="@Localizer.T("common.appName")">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <span class="absolute inset-0 rounded-xl bg-gradient-accent opacity-0 group-hover:opacity-100 blur-md transition-opacity"></span>
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground">@Localizer.T("common.appName")</span>
+            </a>
+
+            <!-- Desktop Nav elements (hidden on mobile, visible on larger screens) -->
+            <nav class="desktop-nav">
+                <!-- Language Switcher -->
+                <a asp-controller="Home" asp-action="SetLanguage" asp-route-culture="@(isRtl ? "en" : "ar")" 
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
+                   title="@(isRtl ? "English" : "العربية")">
+                    <i data-lucide="languages" class="h-4 w-4 shrink-0"></i>
+                    <span>@(isRtl ? "English" : "العربية")</span>
+                </a>
+
+                @if (currentUser != null)
+                {
+                    <!-- Logged-in User Badge (links to profile) -->
+                    <a asp-controller="Dashboard" asp-action="Profile" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:border-accent/40 shadow-soft hover:shadow-md transition-all"
+                       title="@Localizer.T("common.profile")">
+                        <div class="h-6 w-6 rounded-full bg-gradient-accent flex items-center justify-center text-white text-2xs font-bold shadow-soft shrink-0">
+                            @(!string.IsNullOrEmpty(currentUser.Name) ? currentUser.Name.Substring(0, 1).ToUpper() : "U")
+                        </div>
+                        <div class="text-start">
+                            <div class="text-xs font-bold text-foreground max-w-[120px] truncate">@currentUser.Name</div>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <!-- Sign In Link -->
+                    <a asp-controller="Home" asp-action="Login" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground">
+                        <i data-lucide="log-in" class="h-4 w-4 shrink-0"></i>
+                        <span>@Localizer.T("common.signIn")</span>
+                    </a>
+                }
+
+                @if (currentUser != null)
+                {
+                    @if (isEmployee)
+                    {
+                        <!-- Dashboard link (Admin only) -->
+                        <a asp-controller="Employee" asp-action="Index" 
+                           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                            <i data-lucide="layout-dashboard" class="h-4 w-4 shrink-0"></i>
+                            <span>@Localizer.T("common.dashboard")</span>
+                        </a>
+                    }
+
+                    <!-- Sign Out link (Shared) -->
+                    <a asp-controller="Home" asp-action="Logout" 
+                       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                        <i data-lucide="log-out" class="h-4 w-4 shrink-0"></i>
+                        <span>@Localizer.T("common.signOut")</span>
+                    </a>
+
+                    @if (!isEmployee)
+                    {
+                        <!-- Book link (Customer only) -->
+                        <a asp-controller="Booking" asp-action="Index" 
+                           class="inline-flex items-center gap-2.5 px-4 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">
+                            <i data-lucide="plus" class="h-4 w-4 shrink-0"></i>
+                            <span>@Localizer.T("common.bookAppointment")</span>
+                        </a>
+                    }
+                }
+            </nav>
+
+            <!-- Mobile menu controls (visible only on mobile) -->
+            <div class="mobile-nav-controls">
+                <!-- Language Switcher -->
+                <a asp-controller="Home" asp-action="SetLanguage" asp-route-culture="@(isRtl ? "en" : "ar")" 
+                   class="inline-flex items-center gap-1 px-2 py-1.5 rounded-xl text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
+                   title="@(isRtl ? "English" : "العربية")">
+                    <i data-lucide="languages" class="h-4 w-4 shrink-0"></i>
+                    <span class="text-xs font-bold">@(isRtl ? "EN" : "AR")</span>
+                </a>
+
+                <!-- Hamburger button -->
+                <button id="mobile-menu-toggle" type="button" class="inline-flex items-center justify-center p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none" aria-label="Toggle menu">
+                    <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="menu-icon-close" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu panel (hidden by default) -->
+        <div id="mobile-menu-panel" class="hidden absolute top-16 left-0 right-0 w-full bg-card border-b border-border/80 p-4 shadow-elegant z-50 animate-scale-in flex flex-col gap-3">
+            @if (currentUser != null)
+            {
+                <!-- User Profile Link Card -->
+                <a asp-controller="Dashboard" asp-action="Profile" class="flex items-center gap-3 p-3 rounded-2xl bg-muted/50 border border-border/40 hover:border-accent/40 transition-all">
+                    <div class="h-9 w-9 rounded-full bg-gradient-accent flex items-center justify-center text-white font-bold shadow-soft">
+                        @(!string.IsNullOrEmpty(currentUser.Name) ? currentUser.Name.Substring(0, 1).ToUpper() : "U")
+                    </div>
+                    <div class="text-start">
+                        <div class="text-sm font-bold text-foreground">@currentUser.Name</div>
+                        <div class="text-2xs text-muted-foreground">@Localizer.T("common.profile")</div>
+                    </div>
+                </a>
+            }
+            else
+            {
+                <!-- Sign In Link -->
+                <a asp-controller="Home" asp-action="Login" 
+                   class="flex items-center gap-3 p-3 rounded-2xl bg-muted/50 border border-border/40 hover:bg-muted transition-all text-sm font-medium text-foreground">
+                    <i data-lucide="log-in" class="h-5 w-5 text-accent"></i>
+                    <span>@Localizer.T("common.signIn")</span>
+                </a>
+            }
+
+            <nav class="flex flex-col gap-1">
+                @if (currentUser != null)
+                {
+                    @if (isEmployee)
+                    {
+                        <!-- Dashboard link -->
+                        <a asp-controller="Employee" asp-action="Index" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted text-sm font-medium text-muted-foreground hover:text-foreground transition-all">
+                            <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+                            <span>@Localizer.T("common.dashboard")</span>
+                        </a>
+                    }
+
+                    @if (!isEmployee)
+                    {
+                        <!-- Book link -->
+                        <a asp-controller="Booking" asp-action="Index" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted text-sm font-medium text-muted-foreground hover:text-foreground transition-all">
+                            <i data-lucide="plus" class="h-5 w-5"></i>
+                            <span>@Localizer.T("common.bookAppointment")</span>
+                        </a>
+                    }
+
+                    <!-- Sign Out link -->
+                    <a asp-controller="Home" asp-action="Logout" 
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-rose-500/10 text-sm font-medium text-muted-foreground hover:text-rose-600 transition-all border-t border-border/40 mt-2 pt-3">
+                        <i data-lucide="log-out" class="h-5 w-5"></i>
+                        <span>@Localizer.T("common.signOut")</span>
+                    </a>
+                }
+            </nav>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const toggleBtn = document.getElementById('mobile-menu-toggle');
+                const menuPanel = document.getElementById('mobile-menu-panel');
+                const openIcon = document.getElementById('menu-icon-open');
+                const closeIcon = document.getElementById('menu-icon-close');
+
+                if (toggleBtn && menuPanel) {
+                    toggleBtn.addEventListener('click', function () {
+                        const isHidden = menuPanel.classList.contains('hidden');
+                        if (isHidden) {
+                            menuPanel.classList.remove('hidden');
+                            openIcon.classList.add('hidden');
+                            closeIcon.classList.remove('hidden');
+                        } else {
+                            menuPanel.classList.add('hidden');
+                            openIcon.classList.remove('hidden');
+                            closeIcon.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+        </script>
+    </header>
+
+    <div class="flex-1 flex flex-col">
+        @RenderBody()
+    </div>
+
+    <footer class="border-t border-border/60 py-8 bg-card">
+        <div class="container mx-auto px-4 md:px-8 text-center text-xs text-muted-foreground">
+            © @DateTime.Now.Year @Localizer.T("common.appName") · @Localizer.T("common.tagline")
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

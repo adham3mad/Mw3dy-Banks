@@ -1,0 +1,70 @@
+@inject Mw3dy.Services.LocalizationService Localizer
+@{
+    ViewData["Title"] = "SSO Authentication Required";
+    var culture = Localizer.GetCurrentCulture();
+    var isRtl = culture == "ar";
+}
+
+<div class="flex-1 flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 p-10 bg-card/60 backdrop-blur border border-border/80 rounded-3xl shadow-elegant animate-scale-in text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-mesh pointer-events-none opacity-30"></div>
+        <div class="relative">
+            <!-- Icon -->
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-destructive/10 text-destructive mb-6">
+                <i data-lucide="shield-alert" class="h-8 w-8"></i>
+            </div>
+
+            <!-- Title -->
+            <h2 class="text-2xl font-bold text-foreground tracking-tight">
+                @(isRtl ? "مطلوب تسجيل الدخول" : "Authentication Required")
+            </h2>
+            
+            <!-- Description -->
+            <p class="mt-4 text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                @(isRtl 
+                    ? "هذا التطبيق جزء من نظام المستشفيات المركزي. يرجى تسجيل الدخول من خلال البوابة الرئيسية للوصول لحسابك." 
+                    : "This application is integrated with the central hospital system. Please log in through the main portal to access your bookings.")
+            </p>
+
+            <div class="mt-8 border-t border-border/60 pt-6">
+                <!-- Informational Note -->
+                <p class="text-xs text-muted-foreground flex items-center justify-center gap-1.5 mb-6 bg-muted/50 py-2.5 px-4 rounded-xl">
+                    <i data-lucide="info" class="h-3.5 w-3.5 text-accent shrink-0"></i>
+                    <span>
+                        @(isRtl 
+                            ? "سيقوم النظام بتحويلك تلقائياً لصفحة الحجز بعد مصادقة الهوية." 
+                            : "You will be automatically redirected back here after authentication.")
+                    </span>
+                </p>
+
+                <!-- Dev Tools Section -->
+                <div class="bg-accent/5 border border-accent/20 rounded-2xl p-5 text-start">
+                    <div class="flex items-center gap-2 mb-2 text-accent font-semibold text-xs uppercase tracking-wider">
+                        <i data-lucide="terminal" class="h-3.5 w-3.5"></i>
+                        <span>Developer Console</span>
+                    </div>
+                    <p class="text-xs text-muted-foreground mb-4">
+                        @(isRtl 
+                            ? "لأغراض التطوير والاختبار المحلي، اختر أحد الحسابين لتوليد توكن JWT وتسجيل الدخول:" 
+                            : "For local development and testing, choose one of the roles to generate a JWT token and sign in:")
+                    </p>
+                    <div class="grid grid-cols-1 gap-3">
+                        <a asp-controller="Home" asp-action="GenerateTestToken" 
+                           asp-route-userId="1" asp-route-role="customer" asp-route-name="Ahmad Ali" asp-route-email="ahmad.customer@mw3dy.com"
+                           class="w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-gradient-accent hover:opacity-95 text-white font-medium text-xs shadow-soft transition-all">
+                            <i data-lucide="user" class="h-3.5 w-3.5"></i>
+                            <span>@(isRtl ? "تسجيل دخول كعميل (Ahmad Ali)" : "Sign in as Customer (Ahmad Ali)")</span>
+                        </a>
+
+                        <a asp-controller="Home" asp-action="GenerateTestToken" 
+                           asp-route-userId="2" asp-route-role="employee" asp-route-name="Adham Emad" asp-route-email="adham.employee@mw3dy.com"
+                           class="w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-muted border border-border/80 hover:bg-muted/80 text-foreground font-medium text-xs transition-all">
+                            <i data-lucide="shield" class="h-3.5 w-3.5"></i>
+                            <span>@(isRtl ? "تسجيل دخول كمسؤول (Adham Emad)" : "Sign in as Admin (Adham Emad)")</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

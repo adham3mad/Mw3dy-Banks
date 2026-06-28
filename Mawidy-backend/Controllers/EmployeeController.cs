@@ -8,31 +8,21 @@ using Mw3dy.Services;
 
 namespace Mw3dy.Controllers
 {
-    public class EmployeeController : Controller
+    public class EmployeeController : BaseController
     {
-        private readonly AppDbContext _context;
         private readonly LocalizationService _localizer;
 
-        private int CurrentUserId
+        public EmployeeController(AppDbContext context, LocalizationService localizer, IConfiguration configuration)
+            : base(context, configuration)
         {
-            get
-            {
-                if (Request.Cookies.TryGetValue("mw3dy-user-id", out var idStr) && int.TryParse(idStr, out var id))
-                {
-                    return id;
-                }
-                return 1;
-            }
-        }
-
-        public EmployeeController(AppDbContext context, LocalizationService localizer)
-        {
-            _context = context;
             _localizer = localizer;
         }
 
         public IActionResult Index()
         {
+            var authResult = CheckAuthorization();
+            if (authResult != null) return authResult;
+
             // Check if current user is employee
             var currentUser = _context.Users.Include(u => u.Branch).FirstOrDefault(u => u.Id == CurrentUserId);
             if (currentUser == null || !currentUser.IsEmployee)
@@ -79,8 +69,8 @@ namespace Mw3dy.Controllers
         public IActionResult UpdateStatus(int id, string status, string? remarks)
         {
             // Check if current user is employee
-            var currentUser = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
-            if (currentUser == null || !currentUser.IsEmployee)
+            var currentUser = CurrentUser;
+            if (currentUser == null || !IsEmployee)
             {
                 return Json(new { success = false, message = "Unauthorized access." });
             }

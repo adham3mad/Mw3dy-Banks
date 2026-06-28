@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawidy - Book Appointment</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center gap-2.5 group">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground" data-translate="common.appName">موعدي</span>
+            </a>
+
+            <!-- Nav Elements -->
+            <nav class="flex items-center gap-2">
+                <button onclick="toggleLang()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="languages" class="h-4 w-4"></i>
+                    <span id="langBtnText">English</span>
+                </button>
+                <a href="my-appointments.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                    <span data-translate="common.dashboard">لوحة التحكم</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 md:px-8 py-10 max-w-4xl">
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-foreground" data-translate="common.bookAppointment">حجز موعد جديد</h1>
+            <p class="text-sm text-muted-foreground mt-2" data-translate="hero.bookingDesc">يرجى اتباع الخطوات البسيطة التالية لإتمام حجزك بأمان.</p>
+        </div>
+
+        <!-- Wizard Container -->
+        <div class="bg-card/60 backdrop-blur border border-border/80 rounded-3xl p-6 md:p-8 shadow-elegant relative">
+            
+            <!-- Steps Indicator -->
+            <div class="grid grid-cols-4 gap-2 mb-8 border-b border-border/50 pb-6 text-center text-xs font-semibold text-muted-foreground">
+                <div id="step-tab-1" class="text-accent border-b-2 border-accent pb-2">
+                    <span class="block text-lg font-bold">1</span>
+                    <span data-translate="steps.selectService">الخدمة</span>
+                </div>
+                <div id="step-tab-2" class="pb-2">
+                    <span class="block text-lg font-bold">2</span>
+                    <span data-translate="steps.selectBranch">الفرع</span>
+                </div>
+                <div id="step-tab-3" class="pb-2">
+                    <span class="block text-lg font-bold">3</span>
+                    <span data-translate="steps.selectDateTime">التاريخ والوقت</span>
+                </div>
+                <div id="step-tab-4" class="pb-2">
+                    <span class="block text-lg font-bold">4</span>
+                    <span data-translate="steps.confirmDetails">التأكيد</span>
+                </div>
+            </div>
+
+            <!-- Wizard Forms -->
+            <form id="booking-form" onsubmit="submitBooking(event)">
+                
+                <!-- Step 1: Services -->
+                <div id="step-1" class="space-y-4">
+                    <h3 class="text-lg font-bold text-foreground mb-4" data-translate="steps.selectService">اختر الخدمة المطلوبة</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="border border-border/80 bg-background/50 p-4 rounded-2xl flex items-center gap-3 cursor-pointer hover:border-accent transition-all">
+                            <input type="radio" name="service" value="general" checked class="text-accent focus:ring-accent">
+                            <div>
+                                <div class="font-bold text-sm">استشارة عامة (General Consultation)</div>
+                                <div class="text-xs text-muted-foreground">مراجعة عامة للملف الطبي والاحتياجات الأساسية</div>
+                            </div>
+                        </label>
+                        <label class="border border-border/80 bg-background/50 p-4 rounded-2xl flex items-center gap-3 cursor-pointer hover:border-accent transition-all">
+                            <input type="radio" name="service" value="specialty" class="text-accent focus:ring-accent">
+                            <div>
+                                <div class="font-bold text-sm">عيادة تخصصية (Specialty Clinic)</div>
+                                <div class="text-xs text-muted-foreground">فحص متخصص مع طبيب استشاري في فرعك المفضل</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 2: Branches -->
+                <div id="step-2" class="hidden space-y-4">
+                    <h3 class="text-lg font-bold text-foreground mb-4" data-translate="steps.selectBranch">اختر الفرع الأقرب إليك</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label class="border border-border/80 bg-background/50 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-accent transition-all">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" name="branchId" value="1" checked class="text-accent">
+                                <div>
+                                    <div class="font-bold text-sm">فرع التجمع الخامس (New Cairo Branch)</div>
+                                    <div class="text-xs text-muted-foreground">شارع التسعين الشمالي، القاهرة الجديدة</div>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-muted py-1 px-2.5 rounded-full font-semibold">1.2 KM</span>
+                        </label>
+                        <label class="border border-border/80 bg-background/50 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-accent transition-all">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" name="branchId" value="2" class="text-accent">
+                                <div>
+                                    <div class="font-bold text-sm">فرع المهندسين (Mohandessin Branch)</div>
+                                    <div class="text-xs text-muted-foreground">شارع جامعة الدول العربية، الجيزة</div>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-muted py-1 px-2.5 rounded-full font-semibold">12.5 KM</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 3: Date & Time -->
+                <div id="step-3" class="hidden space-y-4">
+                    <h3 class="text-lg font-bold text-foreground mb-4" data-translate="steps.selectDateTime">حدد تاريخ ووقت الحجز</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1.5">اختر التاريخ (Date)</label>
+                            <input type="date" name="date" required id="booking-date" class="w-full h-11 px-3.5 rounded-xl border border-border bg-background focus:outline-none focus:border-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1.5">الفترة المتاحة (Time Slot)</label>
+                            <select name="time" required class="w-full h-11 px-3.5 rounded-xl border border-border bg-background focus:outline-none focus:border-accent">
+                                <option value="09:00 AM">09:00 AM - 09:30 AM</option>
+                                <option value="10:00 AM">10:00 AM - 10:30 AM</option>
+                                <option value="01:00 PM">01:00 PM - 01:30 PM</option>
+                                <option value="04:00 PM">04:00 PM - 04:30 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Confirm Details -->
+                <div id="step-4" class="hidden space-y-4">
+                    <h3 class="text-lg font-bold text-foreground mb-4" data-translate="steps.confirmDetails">تأكيد تفاصيل الحجز</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1.5">ملاحظات إضافية (Notes)</label>
+                            <textarea name="notes" placeholder="اكتب أي تفاصيل أو متطلبات خاصة هنا..." class="w-full min-h-[100px] p-3.5 rounded-xl border border-border bg-background focus:outline-none focus:border-accent text-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex items-center justify-between mt-8 border-t border-border/50 pt-6">
+                    <button type="button" id="btn-prev" onclick="prevStep()" class="hidden inline-flex items-center gap-1.5 h-11 px-6 rounded-xl border border-border hover:bg-muted font-semibold transition-colors">
+                        <i data-lucide="chevron-right" class="h-4 w-4 rotate-180"></i>
+                        <span>السابق</span>
+                    </button>
+                    <div></div>
+                    <button type="button" id="btn-next" onclick="nextStep()" class="inline-flex items-center gap-1.5 h-11 px-6 rounded-xl bg-gradient-accent text-white font-semibold shadow-soft hover:opacity-95 transition-all">
+                        <span>التالي</span>
+                        <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                    </button>
+                    <button type="submit" id="btn-submit" class="hidden inline-flex items-center gap-1.5 h-11 px-6 rounded-xl bg-gradient-accent text-white font-semibold shadow-soft hover:opacity-95 transition-all">
+                        <span>تأكيد الحجز</span>
+                        <i data-lucide="check" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="border-t border-border/60 py-8 bg-card text-center text-xs text-muted-foreground">
+        © 2026 موعدي - Mw3dy · جميع الحقوق محفوظة
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Set default date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('booking-date').value = tomorrow.toISOString().split('T')[0];
+
+        function toggleLang() {
+            const nextLang = currentLanguage === 'ar' ? 'en' : 'ar';
+            setLanguage(nextLang);
+            document.getElementById('langBtnText').innerText = nextLang === 'ar' ? 'English' : 'العربية';
+        }
+
+        function updateStepUI() {
+            // Hide all steps
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById(`step-${i}`).classList.add('hidden');
+                document.getElementById(`step-tab-${i}`).className = 'pb-2';
+            }
+
+            // Show active step
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-tab-${currentStep}`).className = 'text-accent border-b-2 border-accent pb-2';
+
+            // Show/hide navigation buttons
+            if (currentStep === 1) {
+                document.getElementById('btn-prev').classList.add('hidden');
+            } else {
+                document.getElementById('btn-prev').classList.remove('hidden');
+            }
+
+            if (currentStep === totalSteps) {
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('btn-submit').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-next').classList.remove('hidden');
+                document.getElementById('btn-submit').classList.add('hidden');
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStepUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepUI();
+            }
+        }
+
+        async function submitBooking(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const bookingData = {
+                service: formData.get('service'),
+                branchId: parseInt(formData.get('branchId')),
+                date: formData.get('date'),
+                time: formData.get('time'),
+                notes: formData.get('notes')
+            };
+
+            // Attempt to submit to C# Backend if running
+            try {
+                const response = await fetch('http://localhost:5281/Booking/Confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Read cookie or authorization if header is set
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(currentLanguage === 'ar' ? 'تم تأكيد الحجز بنجاح!' : 'Booking confirmed successfully!');
+                    window.location.href = 'my-appointments.html';
+                    return;
+                } else {
+                    alert(result.message || (currentLanguage === 'ar' ? 'حدث خطأ أثناء التأكيد.' : 'Failed to confirm booking.'));
+                }
+            } catch (err) {
+                console.warn('Backend offline, running in mock mode. Simulating booking confirmation...');
+                alert(currentLanguage === 'ar' ? 'تم تأكيد الحجز بنجاح (وضع التجربة)!' : 'Booking confirmed successfully (Mock Mode)!');
+                window.location.href = 'my-appointments.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('langBtnText').innerText = currentLanguage === 'ar' ? 'English' : 'العربية';
+        });
+    </script>
+</body>
+</html>

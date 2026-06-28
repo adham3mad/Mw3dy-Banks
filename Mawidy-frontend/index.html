@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawidy - Booking Portal</title>
+    <!-- Tailwind stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center gap-2.5 group">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground" data-translate="common.appName">موعدي</span>
+            </a>
+
+            <!-- Nav Elements -->
+            <nav class="flex items-center gap-2">
+                <!-- Language Toggle -->
+                <button onclick="toggleLang()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="languages" class="h-4 w-4"></i>
+                    <span id="langBtnText">English</span>
+                </button>
+
+                <a href="my-appointments.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                    <span data-translate="common.dashboard">لوحة التحكم</span>
+                </a>
+
+                <a href="admin/dashboard.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground text-accent">
+                    <i data-lucide="shield" class="h-4 w-4"></i>
+                    <span data-translate="employee.portal">بوابة الموظفين</span>
+                </a>
+
+                <a href="appointments.html" class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-accent hover:opacity-95 text-white rounded-xl text-sm font-medium transition-all shadow-soft">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    <span data-translate="common.bookAppointment">احجز موعداً</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden border-b border-border/40 py-20 md:py-32">
+            <div class="absolute inset-0 bg-gradient-mesh pointer-events-none opacity-40"></div>
+            <div class="container mx-auto px-4 md:px-8 relative z-10 text-center">
+                <div class="inline-flex items-center gap-2 rounded-full border border-border/85 bg-card/90 px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-soft mb-6">
+                    <i data-lucide="sparkles" class="h-3.5 w-3.5 text-accent animate-pulse"></i>
+                    <span data-translate="common.secureNote">حجز فوري ومؤمن بالكامل</span>
+                </div>
+                
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground leading-tight max-w-4xl mx-auto" data-translate="hero.title">
+                    احجز موعدك الطبي بكل سهولة وأمان
+                </h1>
+                
+                <p class="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto" data-translate="hero.subtitle">
+                    خطوتك الأولى نحو رعاية صحية متكاملة. احجز موعدك الآن مع أفضل الأطباء في فروعنا المتميزة.
+                </p>
+                
+                <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+                    <a href="appointments.html" class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl bg-gradient-accent hover:opacity-95 text-white font-medium shadow-glow transition-all">
+                        <span data-translate="hero.cta">احجز موعدك الآن</span>
+                        <i data-lucide="calendar" class="h-4.5 w-4.5"></i>
+                    </a>
+                    <a href="#demo-sso" class="inline-flex items-center justify-center h-12 px-8 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-medium transition-colors">
+                        <span>تجربة الربط الموحد (SSO)</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SSO Simulation / Integration Console -->
+        <section id="demo-sso" class="py-16 bg-muted/40 border-b border-border/50">
+            <div class="container mx-auto px-4 md:px-8 max-w-3xl">
+                <div class="bg-card/75 border border-border rounded-3xl p-8 md:p-10 shadow-elegant relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                        <i data-lucide="key-round" class="h-40 w-40"></i>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="h-10 w-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
+                                <i data-lucide="terminal" class="h-5 w-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-foreground">بوابة محاكاة الربط الأحادي (SSO Simulator)</h3>
+                                <p class="text-xs text-muted-foreground">قم بإنشاء توكن JWT لمحاكاة تسجيل دخول مستخدم من بوابة المستشفى أو صفحة الهبوط</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-muted-foreground mb-1.5">اسم المستخدم (Name)</label>
+                                <input type="text" id="sso-name" value="أدهم عماد" class="w-full h-10 px-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-accent">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-muted-foreground mb-1.5">البريد الإلكتروني (Email)</label>
+                                <input type="text" id="sso-email" value="adham@mw3dy.com" class="w-full h-10 px-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-accent">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-muted-foreground mb-1.5">معرّف المستخدم (User ID)</label>
+                                <select id="sso-id" class="w-full h-10 px-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-accent">
+                                    <option value="1">1 (مريض افتراضي)</option>
+                                    <option value="2">2 (موظف افتراضي)</option>
+                                    <option value="99">99 (مستخدم خارجي جديد)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-muted-foreground mb-1.5">دور المستخدم (Role)</label>
+                                <select id="sso-role" class="w-full h-10 px-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-accent">
+                                    <option value="customer">مريض (Customer)</option>
+                                    <option value="employee">موظف (Employee / Admin)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="simulateSsoLogin()" class="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-accent text-white font-medium shadow-soft hover:opacity-95 transition-all">
+                            <i data-lucide="rocket" class="h-4.5 w-4.5"></i>
+                            <span>تشغيل محاكاة الدخول الأحادي (SSO Token Integration)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-border/60 py-8 bg-card text-center text-xs text-muted-foreground">
+        © 2026 موعدي - Mw3dy · جميع الحقوق محفوظة
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script>
+        function toggleLang() {
+            const nextLang = currentLanguage === 'ar' ? 'en' : 'ar';
+            setLanguage(nextLang);
+            document.getElementById('langBtnText').innerText = nextLang === 'ar' ? 'English' : 'العربية';
+        }
+
+        // Simulate local SSO login by redirecting to the backend local helper
+        function simulateSsoLogin() {
+            const name = document.getElementById('sso-name').value;
+            const email = document.getElementById('sso-email').value;
+            const userId = document.getElementById('sso-id').value;
+            const role = document.getElementById('sso-role').value;
+            
+            // Call the local backend helper endpoint to generate token & auto login
+            const testUrl = `http://localhost:5281/Home/GenerateTestToken?userId=${userId}&role=${role}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+            
+            // Redirect to backend helper to trigger cookie write and redirect
+            window.location.href = testUrl;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('langBtnText').innerText = currentLanguage === 'ar' ? 'English' : 'العربية';
+        });
+    </script>
+</body>
+</html>

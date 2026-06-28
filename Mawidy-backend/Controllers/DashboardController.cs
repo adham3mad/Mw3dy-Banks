@@ -7,37 +7,22 @@ using Mw3dy.Models;
 
 namespace Mw3dy.Controllers
 {
-    public class DashboardController : Controller
+    public class DashboardController : BaseController
     {
-        private readonly AppDbContext _context;
-
-        private int CurrentUserId
+        public DashboardController(AppDbContext context, IConfiguration configuration)
+            : base(context, configuration)
         {
-            get
-            {
-                if (Request.Cookies.TryGetValue("mw3dy-user-id", out var idStr) && int.TryParse(idStr, out var id))
-                {
-                    return id;
-                }
-                return 1;
-            }
-        }
-
-        public DashboardController(AppDbContext context)
-        {
-            _context = context;
         }
 
         public IActionResult Index()
         {
-            // Verify default user exists (it is seeded, but safety check)
-            var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
+            var authResult = CheckAuthorization();
+            if (authResult != null) return authResult;
+
+            var user = CurrentUser;
             if (user == null)
             {
-                // Re-seed if missing
-                user = new User { Id = CurrentUserId, Name = "Adham Emad", Email = "adham@mw3dy.com" };
-                _context.Users.Add(user);
-                _context.SaveChanges();
+                return RedirectToAction("Login", "Home");
             }
 
             if (user.IsEmployee)
@@ -60,6 +45,15 @@ namespace Mw3dy.Controllers
         [HttpPost]
         public IActionResult Cancel(int id)
         {
+            if (CurrentUser == null)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Authentication required." });
+                }
+                return RedirectToAction("Login", "Home");
+            }
+
             var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id && a.UserId == CurrentUserId);
             if (appointment != null)
             {
@@ -86,24 +80,13 @@ namespace Mw3dy.Controllers
         [HttpGet]
         public IActionResult Profile()
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
+            var authResult = CheckAuthorization();
+            if (authResult != null) return authResult;
+
+            var user = CurrentUser;
             if (user == null)
             {
-                user = new User 
-                { 
-                    Id = CurrentUserId, 
-                    Name = "Adham Emad", 
-                    Email = "adham@mw3dy.com",
-                    City = "Brooklyn, NY",
-                    Address = "180 Montague St"
-                };
-                _context.Users.Add(user);
-                _context.SaveChanges();
-            }
-
-            if (user.IsEmployee)
-            {
-                return RedirectToAction("Index", "Employee");
+                return RedirectToAction("Login", "Home");
             }
 
             var cities = _context.Branches
@@ -120,15 +103,19 @@ namespace Mw3dy.Controllers
         [HttpPost]
         public IActionResult Profile(string name, string email, string phone, string city, string address)
         {
+            if (CurrentUser == null)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Authentication required." });
+                }
+                return RedirectToAction("Login", "Home");
+            }
+
             var user = _context.Users.FirstOrDefault(u => u.Id == CurrentUserId);
             if (user == null)
             {
                 return NotFound();
-            }
-
-            if (user.IsEmployee)
-            {
-                return RedirectToAction("Index", "Employee");
             }
 
             user.Name = name ?? string.Empty;

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawidy - Customer Complaints</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-foreground antialiased font-sans">
+    
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 w-full border-b border-border/60 glass">
+        <div class="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
+            <a href="dashboard.html" class="flex items-center gap-2.5 group">
+                <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-accent shadow-glow">
+                    <svg viewBox="0 0 24 24" class="relative h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V10l7-5 7 5v11"></path>
+                        <path d="M9 21v-7h6v7"></path>
+                    </svg>
+                </span>
+                <span class="font-semibold tracking-tight text-base text-foreground" data-translate="common.appName">موعدي</span>
+            </a>
+
+            <!-- Nav Elements -->
+            <nav class="flex items-center gap-2">
+                <button onclick="toggleLang()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="languages" class="h-4 w-4"></i>
+                    <span id="langBtnText">English</span>
+                </button>
+                <a href="dashboard.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 md:px-8 py-10 max-w-5xl">
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-foreground">إدارة الشكاوى والاعتراضات</h1>
+            <p class="text-sm text-muted-foreground mt-2">مراجعة والرد على بطاقات الدعم الفني والشكاوى الواردة من المرضى.</p>
+        </div>
+
+        <div class="bg-card border border-border/80 rounded-3xl overflow-hidden shadow-elegant p-8 text-center text-muted-foreground">
+            <i data-lucide="life-buoy" class="h-12 w-12 mx-auto mb-3 opacity-40"></i>
+            <h3 class="font-bold text-lg text-foreground mb-2">مركز شكاوى العملاء</h3>
+            <p class="text-sm mb-4">هذه الشاشة تمكن فريق الدعم الفني من الرد المباشر على مشاكل حجز الفروع.</p>
+            <span class="text-xs bg-accent/15 text-accent py-1 px-3 rounded-full font-semibold">قريباً في الإصدار القادم</span>
+        </div>
+    </main>
+
+    <footer class="border-t border-border/60 py-8 bg-card text-center text-xs text-muted-foreground">
+        © 2026 موعدي - Mw3dy · جميع الحقوق محفوظة
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script>
+        function toggleLang() {
+            const nextLang = currentLanguage === 'ar' ? 'en' : 'ar';
+            setLanguage(nextLang);
+            document.getElementById('langBtnText').innerText = nextLang === 'ar' ? 'English' : 'العربية';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('langBtnText').innerText = currentLanguage === 'ar' ? 'English' : 'العربية';
+        });
+    </script>
+</body>
+</html>
